@@ -1,10 +1,12 @@
 <script lang="ts">
 	import ApiKeyInput from '$lib/components/ApiKeyInput.svelte';
-	import { isDemoMode } from '$lib/keys.svelte';
+	import PromptInput from '$lib/components/PromptInput.svelte';
+	import ScriptEdit from '$lib/components/ScriptEdit.svelte';
+	import { isDemoMode, appState, isAnyKeyVerified } from '$lib/keys.svelte';
 </script>
 
 <div class="min-h-screen bg-slate-950 px-4 py-12 font-sans text-slate-100 selection:bg-blue-500/30">
-	<main class="mx-auto max-w-4xl">
+	<main class="mx-auto max-w-5xl">
 		<header class="mb-12 text-center">
 			<h1
 				class="mb-2 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-5xl font-black tracking-tighter text-transparent"
@@ -28,19 +30,33 @@
 			{/if}
 		</header>
 
-		<div class="grid gap-8 md:grid-cols-2">
-			<section>
+		{#if isAnyKeyVerified.value}
+			<div class="mb-8">
 				<ApiKeyInput />
-			</section>
+			</div>
+			<div class="grid gap-8 md:grid-cols-2">
+				<section>
+					<PromptInput />
+				</section>
+				<section>
+					<ScriptEdit />
+				</section>
+			</div>
+		{:else}
+			<div class="grid gap-8 md:grid-cols-2">
+				<section>
+					<ApiKeyInput />
+				</section>
 
-			<section class="flex flex-col justify-center rounded-lg border border-slate-800 p-6 text-center">
-				<div class="mb-4 text-4xl">🏗️</div>
-				<h3 class="mb-2 text-xl font-semibold">Prompt Engine Coming Soon</h3>
-				<p class="text-slate-400">
-					Once configured, you'll be able to generate scripts in Node.js or Python with built-in crontab
-					support.
-				</p>
-			</section>
-		</div>
+				<section class="flex flex-col justify-center rounded-lg border border-slate-800 p-6 text-center">
+					<div class="mb-4 text-4xl">🏗️</div>
+					<h3 class="mb-2 text-xl font-semibold">Prompt Engine Coming Soon</h3>
+					<p class="text-slate-400">
+						Once configured, you'll be able to generate scripts in Node.js or Python with built-in crontab
+						support.
+					</p>
+				</section>
+			</div>
+		{/if}
 	</main>
 </div>

@@ -1,64 +1,160 @@
 <script lang="ts">
-	import { keys, saveKeys, clearKeys } from '$lib/keys.svelte';
+	import { keys, saveKeys, appState, setKeyVerified, setDefaultModel } from '$lib/keys.svelte';
 
 	let geminiInput = $state(keys.gemini);
 	let claudeInput = $state(keys.claude);
-	let isEditing = $state(!keys.gemini);
+	let isEditing = $state(!keys.gemini && !keys.claude);
 
-	let isTesting = $state(false);
-	let testStatus = $state<{ success?: boolean; message?: string }>({});
+	let isTestingGemini = $state(false);
+	let isTestingClaude = $state(false);
+	let geminiTestStatus = $state<{ success?: boolean; message?: string }>({});
+	let claudeTestStatus = $state<{ success?: boolean; message?: string }>({});
 
 	function handleSave() {
 		saveKeys(geminiInput, claudeInput);
 		isEditing = false;
-		testStatus = {};
+		geminiTestStatus = {};
+		claudeTestStatus = {};
 	}
 
-	async function testConnection() {
+	async function testGemini() {
 		if (!geminiInput) return;
-		isTesting = true;
-		testStatus = {};
+		isTestingGemini = true;
+		geminiTestStatus = {};
 
 		try {
-			// Using a lightweight endpoint to verify the key
 			const response = await fetch(
 				`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiInput}`
 			);
 
 			if (response.ok) {
-				testStatus = { success: true, message: 'Gemini API connection successful!' };
+				geminiTestStatus = { success: true, message: 'Gemini API connection successful!' };
+				setKeyVerified('gemini', true);
 			} else {
 				const error = await response.json();
-				testStatus = {
+				geminiTestStatus = {
 					success: false,
 					message: error.error?.message || 'Invalid Gemini API key.'
 				};
 			}
 		} catch (e) {
-			testStatus = { success: false, message: 'Connection failed. Check your network.' };
+			geminiTestStatus = { success: false, message: 'Connection failed. Check your network.' };
 		} finally {
-			isTesting = false;
+			isTestingGemini = false;
+		}
+	}
+
+	async function testClaude() {
+		if (!claudeInput) return;
+		isTestingClaude = true;
+		claudeTestStatus = {};
+
+		try {
+			const response = await fetch('/api/claude', {
+				method: 'POST',
+				headers: {
+					'x-api-key': claudeInput,
+					'content-type': 'application/json'
+				},
+				body: JSON.stringify({
+					model: 'claude-haiku-4-5',
+					max_tokens: 1,
+					messages: [{ role: 'user', content: 'test' }]
+				})
+			});
+
+			if (response.ok) {
+				claudeTestStatus = { success: true, message: 'Claude API connection successful!' };
+				setKeyVerified('claude', true);
+			} else {
+				const error = await response.json();
+				claudeTestStatus = {
+					success: false,
+					message: error.error?.message || 'Invalid Claude API key or CORS error.'
+				};
+			}
+		} catch (e) {
+			claudeTestStatus = {
+				success: false,
+				message: 'Connection failed. Likely a CORS restriction or network issue.'
+			};
+		} finally {
+			isTestingClaude = false;
 		}
 	}
 
 	function handleEdit() {
 		isEditing = true;
-		testStatus = {};
+		geminiTestStatus = {};
+		claudeTestStatus = {};
 	}
 </script>
 
-<div class="rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-xl">
-	<div class="mb-4 flex items-center justify-between">
-		<h2 class="text-xl font-bold text-slate-100">API Configuration</h2>
-		{#if !isEditing}
+{#if (appState.geminiVerified || appState.claudeVerified) && !isEditing}
+	<div class="rounded-lg border border-slate-700 bg-slate-900 p-4 shadow-xl">
+		<div class="flex items-center justify-between">
+			<div class="flex flex-wrap gap-4">
+				{#if appState.geminiVerified}
+					<div class="flex items-center gap-2">
+						<div class="h-2 w-2 rounded-full bg-green-500"></div>
+						<span class="text-sm font-medium text-green-400">Gemini Ready</span>
+					</div>
+				{/if}
+				{#if appState.claudeVerified}
+					<div class="flex items-center gap-2">
+						<div class="h-2 w-2 rounded-full bg-green-500"></div>
+						<span class="text-sm font-medium text-green-400">Claude Ready</span>
+					</div>
+				{/if}
+			</div>
 			<button onclick={handleEdit} class="text-sm text-blue-400 hover:text-blue-300 hover:underline">
-				Edit Keys
+				Edit Configuration
 			</button>
+		</div>
+
+		{#if appState.geminiVerified && appState.claudeVerified}
+			<div class="mt-4 flex items-center gap-4 border-t border-slate-800 pt-4">
+				<span class="text-sm font-medium text-slate-400">Default Model:</span>
+				<div class="flex gap-4">
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input
+							type="radio"
+							name="defaultModel"
+							value="gemini"
+							checked={appState.defaultModel === 'gemini'}
+							onchange={() => setDefaultModel('gemini')}
+							class="text-blue-600"
+						/>
+						<span class="text-sm text-slate-200">Gemini</span>
+					</label>
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input
+							type="radio"
+							name="defaultModel"
+							value="claude"
+							checked={appState.defaultModel === 'claude'}
+							onchange={() => setDefaultModel('claude')}
+							class="text-blue-600"
+						/>
+						<span class="text-sm text-slate-200">Claude</span>
+					</label>
+				</div>
+			</div>
 		{/if}
 	</div>
+{:else}
+	<div class="rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-xl">
+		<div class="mb-4 flex items-center justify-between">
+			<h2 class="text-xl font-bold text-slate-100">API Configuration</h2>
+			{#if !isEditing && (appState.geminiVerified || appState.claudeVerified)}
+				<button onclick={handleEdit} class="text-sm text-blue-400 hover:text-blue-300 hover:underline">
+					Edit Keys
+				</button>
+			{/if}
+		</div>
 
-	{#if isEditing}
-		<div class="space-y-4">
+		<div class="space-y-6">
+			<!-- Gemini -->
 			<div>
 				<div class="mb-1 flex items-center justify-between">
 					<label for="gemini-key" class="block text-sm font-medium text-slate-400">
@@ -82,22 +178,23 @@
 						class="flex-1 rounded border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 focus:border-blue-500 focus:outline-none"
 					/>
 					<button
-						onclick={testConnection}
-						disabled={!geminiInput || isTesting}
+						onclick={testGemini}
+						disabled={!geminiInput || isTestingGemini}
 						class="rounded bg-slate-800 px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 disabled:opacity-50"
 					>
-						{isTesting ? '...' : 'Test'}
+						{isTestingGemini ? '...' : 'Test'}
 					</button>
 				</div>
-				{#if testStatus.message}
+				{#if geminiTestStatus.message}
 					<p
-						class="mt-1 text-xs {testStatus.success ? 'text-green-400' : 'text-red-400'}"
+						class="mt-1 text-xs {geminiTestStatus.success ? 'text-green-400' : 'text-red-400'}"
 					>
-						{testStatus.message}
+						{geminiTestStatus.message}
 					</p>
 				{/if}
 			</div>
 
+			<!-- Claude -->
 			<div>
 				<div class="mb-1 flex items-center justify-between">
 					<label for="claude-key" class="block text-sm font-medium text-slate-400">
@@ -112,13 +209,33 @@
 						Get Key →
 					</a>
 				</div>
-				<input
-					id="claude-key"
-					type="password"
-					bind:value={claudeInput}
-					placeholder="Enter your Anthropic Claude key..."
-					class="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 focus:border-blue-500 focus:outline-none"
-				/>
+				<div class="flex gap-2">
+					<input
+						id="claude-key"
+						type="password"
+						bind:value={claudeInput}
+						readonly
+						placeholder="Enter your Anthropic Claude key..."
+						class="flex-1 cursor-not-allowed opacity-75 rounded border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 focus:outline-none"
+					/>
+					<button
+						onclick={testClaude}
+						disabled={!claudeInput || isTestingClaude}
+						class="rounded bg-slate-800 px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 disabled:opacity-50"
+					>
+						{isTestingClaude ? '...' : 'Test'}
+					</button>
+				</div>
+				<p class="mt-1 text-xs text-slate-500">
+					Due to Anthropic's API security, Claude requires a local environment. Set your API key in the <code>.env</code> file.
+				</p>
+				{#if claudeTestStatus.message}
+					<p
+						class="mt-1 text-xs {claudeTestStatus.success ? 'text-green-400' : 'text-red-400'}"
+					>
+						{claudeTestStatus.message}
+					</p>
+				{/if}
 			</div>
 
 			<div class="flex gap-3 pt-2">
@@ -128,7 +245,7 @@
 				>
 					Save Configuration
 				</button>
-				{#if keys.gemini}
+				{#if keys.gemini || keys.claude}
 					<button
 						onclick={() => (isEditing = false)}
 						class="rounded bg-slate-700 px-4 py-2 font-semibold text-slate-200 transition-colors hover:bg-slate-600"
@@ -141,23 +258,5 @@
 				Keys are stored in your browser's <code>localStorage</code> and never sent to our servers.
 			</p>
 		</div>
-	{:else}
-		<div class="space-y-2">
-			<div class="flex items-center gap-2">
-				<div class="h-2 w-2 rounded-full bg-green-500"></div>
-				<span class="text-sm text-slate-300">Gemini Key Configured</span>
-			</div>
-			{#if keys.claude}
-				<div class="flex items-center gap-2">
-					<div class="h-2 w-2 rounded-full bg-green-500"></div>
-					<span class="text-sm text-slate-300">Claude Key Configured</span>
-				</div>
-			{:else}
-				<div class="flex items-center gap-2">
-					<div class="h-2 w-2 rounded-full bg-slate-600"></div>
-					<span class="text-sm text-slate-400">Claude Key Missing (Optional)</span>
-				</div>
-			{/if}
-		</div>
-	{/if}
-</div>
+	</div>
+{/if}

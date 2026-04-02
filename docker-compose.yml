@@ -8,6 +8,7 @@ services:
       - VITE_ALLOWED_HOSTS=${VITE_ALLOWED_HOSTS:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - CLAUDE_API_KEY=${CLAUDE_API_KEY:-}
+      - NODE_OPTIONS=--dns-result-order=ipv4first
     volumes:
       - .:/app
       - /app/node_modules
