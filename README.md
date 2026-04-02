@@ -1,42 +1,43 @@
-# sv
+# croncode.ai
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A minimalist AI code generator for your recurring scripts. Generate Node.js or Python scripts with built-in crontab support.
 
-## Creating a project
+## Getting Started
 
-If you're seeing this, you've probably already done this step. Congrats!
+### Local Setup
 
-```sh
-# create a new project
-npx sv create my-app
+1.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+2.  **Start the development server:**
+    ```bash
+    npm run dev
+    ```
+
+### Docker Setup
+
+If you prefer using Docker:
+
+```bash
+docker compose up
 ```
 
-To recreate this project with the same configuration:
+The app will be available at `http://localhost:5173`.
 
-```sh
-# recreate this project
-npx sv@0.13.1 create --template minimal --types ts --add prettier eslint --no-download-check --no-install .
-```
+## Tech Stack
 
-## Developing
+- **Framework:** [SvelteKit](https://kit.svelte.dev/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool:** [Vite](https://vitejs.dev/)
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Available Commands
 
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+- `npm run dev`: Start development server
+- `npm run build`: Build for production
+- `npm run preview`: Preview production build
+- `npm run check`: Run Svelte and TypeScript checks
+- `npm run lint`: Run Prettier and ESLint
+- `npm run format`: Format code with Prettier
