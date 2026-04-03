@@ -1,30 +1,48 @@
 # croncode.ai
 
-A minimalist AI code generator for your recurring scripts. Generate Node.js or Python scripts with built-in crontab support.
+A minimalist AI code generator for your recurring scripts. Generate Node.js or Python scripts with built-in crontab support. Try it at https://croncode.ai
 
-## Getting Started
+## Development Environments
 
-### Local Setup
+There are three ways to run the development environment locally. All methods support Hot Module Replacement (HMR) and provide a consistent experience.
 
-1.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+### 1. Standard Dev Mode (Vite)
+Best for rapid UI development and general logic.
+```bash
+npm install
+npm run dev
+```
+The app will be available at `http://localhost:5173`.
 
-2.  **Start the development server:**
-    ```bash
-    npm run dev
-    ```
+### 2. Cloudflare Wrangler Emulation
+Best for testing Cloudflare-specific features and ensuring production compatibility before deploying to Cloudflare Pages.
+```bash
+npm install
+npm run dev:wrangler
+```
+This builds the project and runs it using the local Wrangler Pages emulator.
 
-### Docker Setup
-
-If you prefer using Docker:
-
+### 3. Docker Compose
+Best for a completely isolated environment or for contributors who prefer not to install Node.js locally.
 ```bash
 docker compose up
 ```
+The container automatically maps your host user's UID/GID to prevent permission issues with build caches. The app will be available at `http://localhost:5173`.
 
-The app will be available at `http://localhost:5173`.
+## API Key Configuration
+
+The application requires API keys for Google Gemini and/or Anthropic Claude to generate scripts. There are two ways to provide these:
+
+### 1. Environment Variables (`.env`)
+You can create a `.env` file in the project root based on `.env.example`.
+```bash
+GEMINI_API_KEY=your_key_here
+CLAUDE_API_KEY=your_key_here
+```
+When keys are provided via the environment, the server passes them to the client as defaults. On the first load, these keys are automatically saved to your browser's `localStorage`. This is ideal for private development instances where you want the app to be "ready-to-use" immediately.
+
+### 2. In-App UI Configuration
+If no environment variables are provided, or if you wish to override them, you can enter your API keys directly in the application's UI. These keys are stored only in your browser's `localStorage`. This allows users of a shared deployment to use their own personal API keys securely without them being stored on the server.
 
 ## Tech Stack
 
@@ -32,10 +50,12 @@ The app will be available at `http://localhost:5173`.
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
 - **Build Tool:** [Vite](https://vitejs.dev/)
+- **Deployment:** [Cloudflare Pages](https://pages.cloudflare.com/)
 
 ## Available Commands
 
-- `npm run dev`: Start development server
+- `npm run dev`: Start standard Vite development server
+- `npm run dev:wrangler`: Build and start local Cloudflare Wrangler emulator
 - `npm run build`: Build for production
 - `npm run preview`: Preview production build
 - `npm run check`: Run Svelte and TypeScript checks
