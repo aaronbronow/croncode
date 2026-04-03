@@ -100,6 +100,7 @@
 		>
 			<option value="Node.js">Node.js</option>
 			<option value="Python">Python</option>
+			<option value="Bash">Bash</option>
 		</select>
 	</div>
 

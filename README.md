@@ -1,6 +1,6 @@
 # croncode.ai
 
-A minimalist AI code generator for your recurring scripts. Generate Node.js or Python scripts with built-in crontab support. Try it at https://croncode.ai
+A minimalist AI code generator for your recurring scripts. Generate Node.js, Python, or Bash scripts with built-in crontab support. Try it at https://croncode.ai
 
 ## Development Environments
 
