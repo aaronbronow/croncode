@@ -7,6 +7,10 @@ export default defineConfig({
 	server: {
 		host: true,
 		allowedHosts: true,
-		watch: { usePolling: true }
+		watch: { usePolling: true },
+		headers: {
+			'Cross-Origin-Embedder-Policy': 'require-corp',
+			'Cross-Origin-Opener-Policy': 'same-origin'
+		}
 	}
 });

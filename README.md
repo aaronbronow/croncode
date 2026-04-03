@@ -44,6 +44,23 @@ When keys are provided via the environment, the server passes them to the client
 ### 2. In-App UI Configuration
 If no environment variables are provided, or if you wish to override them, you can enter your API keys directly in the application's UI. These keys are stored only in your browser's `localStorage`. This allows users of a shared deployment to use their own personal API keys securely without them being stored on the server.
 
+## In-Browser Script Verification
+
+`croncode.ai` uses a **Hybrid Verification Engine** to allow you to test your generated scripts directly in the browser with high fidelity.
+
+### Hybrid VM Architecture
+
+| Language | Engine | Technology | Best For |
+| :--- | :--- | :--- | :--- |
+| **Node.js** | **WebContainer** | `@webcontainer/api` | Fast, native Node.js execution. |
+| **Python** | **Microterm** | CheerpX (WebVM) | Standard Library & system tool testing. |
+| **Bash** | **Microterm** | CheerpX (WebVM) | Full Linux `coreutils` fidelity (`date`, `curl`). |
+
+### Key Differences
+
+- **WebContainers (WebAssembly)**: Optimized for Node.js workflows. It provides a lightning-fast, Wasm-based micro-runtime that feels native to the browser but is limited to Node.js and basic shell commands.
+- **Microterm (x86 Virtualization)**: Powered by Leaning Technologies' **CheerpX**, this is a full x86 virtualization layer. It boots a real Linux guest (Debian/Alpine) using WebSocket-based chunk streaming, providing a 100% compliant environment for complex Bash and Python scripts that require system-level binaries.
+
 ## Tech Stack
 
 - **Framework:** [SvelteKit](https://kit.svelte.dev/)

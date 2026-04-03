@@ -5,6 +5,8 @@
 	import { python } from '@codemirror/lang-python';
 	import { StreamLanguage } from '@codemirror/language';
 	import { shell } from '@codemirror/legacy-modes/mode/shell';
+	import { executeScript } from '$lib/webcontainer';
+	import MicrotermRunner from './MicrotermRunner.svelte';
 
 	const langs: Record<string, any> = {
 		'Node.js': javascript(),
@@ -13,9 +15,33 @@
 	};
 
 	let editorLang = $derived(langs[scriptState.language] || javascript());
+	let runner: any = $state(null);
 
-	function handleTest() {
-		scriptState.executionOutput = 'WebContainer execution coming in the next phase...';
+	async function handleTest() {
+		scriptState.executionOutput = ''; // Keep this for now for logic compatibility
+		scriptState.isExecuting = true;
+
+		try {
+			if (scriptState.language === 'Node.js') {
+				if (runner) runner.writeToTerminal('\x1b[1;34m[System] Executing Node.js via WebContainer...\x1b[0m\r\n');
+				await executeScript(
+					scriptState.language,
+					scriptState.result,
+					(data) => {
+						if (runner) runner.writeToTerminal(data);
+					},
+					(msg) => {
+						if (runner) runner.writeToTerminal(`\x1b[1;34m${msg}\x1b[0m`);
+					}
+				);
+			} else {
+				if (runner) await runner.runTest(scriptState.result, scriptState.language);
+			}
+		} catch (error: any) {
+			if (runner) runner.writeToTerminal(`\r\n\x1b[1;31m[System Error] ${error.message}\x1b[0m\r\n`);
+		} finally {
+			scriptState.isExecuting = false;
+		}
 	}
 </script>
 
@@ -24,10 +50,10 @@
 		<h2 class="text-xl font-bold text-slate-100">Script</h2>
 		<button
 			onclick={handleTest}
-			disabled={!scriptState.result.trim() || scriptState.isGenerating}
+			disabled={!scriptState.result.trim() || scriptState.isGenerating || scriptState.isExecuting}
 			class="rounded bg-slate-700 px-3 py-1 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600 disabled:opacity-50"
 		>
-			Test Script
+			{scriptState.isExecuting ? 'Running...' : 'Test Script'}
 		</button>
 	</div>
 
@@ -55,10 +81,10 @@
 		{/if}
 	</div>
 
-	{#if scriptState.executionOutput}
-		<div class="mt-auto">
-			<h3 class="mb-2 text-sm font-medium text-slate-400">Execution Output</h3>
-			<pre class="max-h-32 w-full overflow-auto rounded border border-slate-700 bg-black p-3 font-mono text-xs text-slate-300"><code>{scriptState.executionOutput}</code></pre>
+	<div class="mt-auto">
+		<h3 class="mb-2 text-sm font-medium text-slate-400">Terminal Output</h3>
+		<div class="h-64 overflow-hidden rounded border border-slate-700 bg-[#002b36]">
+			<MicrotermRunner bind:this={runner} />
 		</div>
-	{/if}
+	</div>
 </div>
