@@ -9,6 +9,8 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - CLAUDE_API_KEY=${CLAUDE_API_KEY:-}
       - NODE_OPTIONS=--dns-result-order=ipv4first
+      - LOCAL_UID=${UID:-1000}
+      - LOCAL_GID=${GID:-1000}
     volumes:
       - .:/app
       - /app/node_modules

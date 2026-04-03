@@ -5,9 +5,11 @@
 
 	let { data, children } = $props();
 
-	if (data?.defaults) {
-		initDefaults(data.defaults);
-	}
+	$effect(() => {
+		if (data?.defaults) {
+			initDefaults(data.defaults);
+		}
+	});
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
