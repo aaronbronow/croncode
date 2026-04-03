@@ -50,11 +50,13 @@
 		claudeTestStatus = {};
 
 		try {
-			const response = await fetch('/api/claude', {
+			const response = await fetch('https://api.anthropic.com/v1/messages', {
 				method: 'POST',
 				headers: {
 					'x-api-key': claudeInput,
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'anthropic-version': '2023-06-01',
+					'anthropic-dangerous-direct-browser-access': 'true'
 				},
 				body: JSON.stringify({
 					model: 'claude-haiku-4-5',
@@ -198,7 +200,7 @@
 			<div>
 				<div class="mb-1 flex items-center justify-between">
 					<label for="claude-key" class="block text-sm font-medium text-slate-400">
-						Claude API Key (Optional)
+						Claude API Key
 					</label>
 					<a
 						href="https://console.anthropic.com/settings/keys"
@@ -214,9 +216,8 @@
 						id="claude-key"
 						type="password"
 						bind:value={claudeInput}
-						readonly
 						placeholder="Enter your Anthropic Claude key..."
-						class="flex-1 cursor-not-allowed opacity-75 rounded border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 focus:outline-none"
+						class="flex-1 rounded border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 focus:border-blue-500 focus:outline-none"
 					/>
 					<button
 						onclick={testClaude}
@@ -226,9 +227,6 @@
 						{isTestingClaude ? '...' : 'Test'}
 					</button>
 				</div>
-				<p class="mt-1 text-xs text-slate-500">
-					Due to Anthropic's API security, Claude requires a local environment. Set your API key in the <code>.env</code> file.
-				</p>
 				{#if claudeTestStatus.message}
 					<p
 						class="mt-1 text-xs {claudeTestStatus.success ? 'text-green-400' : 'text-red-400'}"

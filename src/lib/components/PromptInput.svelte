@@ -48,11 +48,13 @@
 				const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 				scriptState.result = text.trim();
 			} else if (appState.defaultModel === 'claude') {
-				const response = await fetch('/api/claude', {
+				const response = await fetch('https://api.anthropic.com/v1/messages', {
 					method: 'POST',
 					headers: {
 						'x-api-key': keys.claude,
-						'content-type': 'application/json'
+						'content-type': 'application/json',
+						'anthropic-version': '2023-06-01',
+						'anthropic-dangerous-direct-browser-access': 'true'
 					},
 					body: JSON.stringify({
 						model: 'claude-haiku-4-5',
