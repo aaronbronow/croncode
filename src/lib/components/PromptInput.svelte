@@ -3,7 +3,6 @@
 	import { scriptState } from '$lib/script.svelte';
 
 	let promptText = $state('');
-	let language = $state('Node.js');
 
 	async function generateScript() {
 		if (!promptText.trim()) return;
@@ -13,7 +12,7 @@
 		scriptState.result = '';
 		scriptState.executionOutput = '';
 
-		const systemPrompt = `Generate a ${language} script. Do not use markdown blocks like \`\`\`python, just return the raw code. Output a single functional file.`;
+		const systemPrompt = `Generate a ${scriptState.language} script. Do not use markdown blocks like \`\`\`python, just return the raw code. Output a single functional file.`;
 		const userPrompt = promptText.trim();
 
 		try {
@@ -95,7 +94,7 @@
 		</label>
 		<select
 			id="language-select"
-			bind:value={language}
+			bind:value={scriptState.language}
 			class="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 focus:border-blue-500 focus:outline-none"
 		>
 			<option value="Node.js">Node.js</option>

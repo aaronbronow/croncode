@@ -1,8 +1,21 @@
 <script lang="ts">
 	import { scriptState } from '$lib/script.svelte';
+	import CodeMirror from 'svelte-codemirror-editor';
+	import { javascript } from '@codemirror/lang-javascript';
+	import { python } from '@codemirror/lang-python';
+	import { StreamLanguage } from '@codemirror/language';
+	import { shell } from '@codemirror/legacy-modes/mode/shell';
+
+	const langs: Record<string, any> = {
+		'Node.js': javascript(),
+		Python: python(),
+		Bash: StreamLanguage.define(shell)
+	};
+
+	let editorLang = $derived(langs[scriptState.language] || javascript());
 
 	function handleTest() {
-		scriptState.executionOutput = 'WASM execution coming soon...';
+		scriptState.executionOutput = 'WebContainer execution coming in the next phase...';
 	}
 </script>
 
@@ -25,12 +38,20 @@
 				<div class="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
 			</div>
 		{:else}
-			<textarea
-				id="script-editor"
-				bind:value={scriptState.result}
-				placeholder="Generated script will appear here. You can tweak it before testing."
-				class="h-48 w-full resize-y rounded border border-slate-600 bg-slate-800 px-3 py-2 font-mono text-sm text-slate-100 focus:border-blue-500 focus:outline-none md:h-64"
-			></textarea>
+			<div class="rounded border border-slate-600 focus-within:border-blue-500 overflow-auto h-48 md:h-64">
+				<CodeMirror 
+					bind:value={scriptState.result} 
+					lang={editorLang} 
+					styles={{
+						"&": {
+							backgroundColor: "#1e293b",
+							color: "#f1f5f9",
+							fontSize: "0.875rem",
+							minHeight: "100%"
+						}
+					}} 
+				/>
+			</div>
 		{/if}
 	</div>
 
