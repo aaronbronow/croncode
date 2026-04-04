@@ -46,6 +46,7 @@
 				const data = await response.json();
 				const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 				scriptState.result = text.trim();
+				scriptState.activeLanguage = scriptState.language;
 			} else if (appState.defaultModel === 'claude') {
 				const response = await fetch('https://api.anthropic.com/v1/messages', {
 					method: 'POST',
@@ -71,6 +72,7 @@
 				const data = await response.json();
 				const text = data.content?.[0]?.text || '';
 				scriptState.result = text.trim();
+				scriptState.activeLanguage = scriptState.language;
 			}
 		} catch (e: any) {
 			scriptState.error = e.message || 'An unexpected error occurred.';

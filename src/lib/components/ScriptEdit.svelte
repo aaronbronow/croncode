@@ -21,11 +21,18 @@
 		scriptState.executionOutput = ''; // Keep this for now for logic compatibility
 		scriptState.isExecuting = true;
 
+		if (runner) runner.clearTerminal();
+
 		try {
-			if (scriptState.language === 'Node.js') {
-				if (runner) runner.writeToTerminal('\x1b[1;34m[System] Executing Node.js via WebContainer...\x1b[0m\r\n');
+			// Use activeLanguage (what the code actually is) instead of language (the target preference)
+			const executionLanguage = scriptState.activeLanguage;
+			
+			if (executionLanguage === 'Node.js') {
+				if (runner) {
+					runner.writeToTerminal('\x1b[1;34m[System] Running Node.js script...\x1b[0m\r\n');
+				}
 				await executeScript(
-					scriptState.language,
+					executionLanguage,
 					scriptState.result,
 					(data) => {
 						if (runner) runner.writeToTerminal(data);
@@ -35,10 +42,12 @@
 					}
 				);
 			} else {
-				if (runner) await runner.runTest(scriptState.result, scriptState.language);
+				if (runner) await runner.runTest(scriptState.result, executionLanguage);
 			}
 		} catch (error: any) {
-			if (runner) runner.writeToTerminal(`\r\n\x1b[1;31m[System Error] ${error.message}\x1b[0m\r\n`);
+			console.error('[handleTest Error]', error);
+			const msg = error?.message || error?.toString() || 'Unknown error';
+			if (runner) runner.writeToTerminal(`\r\n\x1b[1;31m[System Error] ${msg}\x1b[0m\r\n`);
 		} finally {
 			scriptState.isExecuting = false;
 		}
@@ -53,7 +62,7 @@
 			disabled={!scriptState.result.trim() || scriptState.isGenerating || scriptState.isExecuting}
 			class="rounded bg-slate-700 px-3 py-1 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600 disabled:opacity-50"
 		>
-			{scriptState.isExecuting ? 'Running...' : 'Test Script'}
+			{scriptState.isExecuting ? 'Running...' : `Test ${scriptState.activeLanguage}`}
 		</button>
 	</div>
 

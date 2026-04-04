@@ -9,7 +9,7 @@
 	let dataDevice: any = null;
 	let sendInput: any = null;
 	let session: any = null;
-	let isBooting = $state(true);
+	let isBooting = $state(false);
 
 	// Solarized Dark Theme for xterm.js
 	const solarizedDark = {
@@ -34,6 +34,88 @@
 		brightWhite: '#fdf6e3'
 	};
 
+	let bootPromise: Promise<void> | null = null;
+
+	export async function bootCheerpX() {
+		if (cx) return;
+		if (bootPromise) return bootPromise;
+
+		bootPromise = (async () => {
+			isBooting = true;
+			terminal.writeln('\x1b[1;34m[System] Initializing Microterm (WebVM/CheerpX)...\x1b[0m');
+
+			// 2. Load CheerpX Engine
+			if (!(window as any).CheerpX) {
+				await new Promise((resolve, reject) => {
+					const script = document.createElement('script');
+					script.src = 'https://cxrtnc.leaningtech.com/1.2.8/cx.js';
+					script.setAttribute('crossorigin', 'anonymous');
+					script.onload = resolve;
+					script.onerror = reject;
+					document.head.appendChild(script);
+				});
+			}
+
+			try {
+				// 3. Boot CheerpX
+				const CheerpX = (window as any).CheerpX;
+				if (!CheerpX) throw new Error('CheerpX engine failed to load from CDN');
+
+				// CloudDevice for the OS image
+				const cloudDevice = await CheerpX.CloudDevice.create('wss://disks.webvm.io/debian_large_20230522_5044875331.ext2');
+				
+				// IDBDevice + OverlayDevice to make the root filesystem writable (required for many bash operations)
+				const idbDevice = await CheerpX.IDBDevice.create('microterm_root');
+				const overlayDevice = await CheerpX.OverlayDevice.create(cloudDevice, idbDevice);
+				
+				// DataDevice for script injection
+				dataDevice = await CheerpX.DataDevice.create();
+
+				cx = await CheerpX.Linux.create({
+					mounts: [
+						{ type: 'ext2', path: '/', dev: overlayDevice },
+						{ type: 'dir', path: '/data', dev: dataDevice },
+						{ type: 'devs', path: '/dev' }
+					]
+				});
+
+				// 4. Connect Terminal
+				sendInput = cx.setCustomConsole(
+					(buf: Uint8Array) => {
+						terminal.write(new Uint8Array(buf));
+					},
+					terminal.cols,
+					terminal.rows
+				);
+
+				terminal.onData((data: string) => {
+					if (sendInput) {
+						for (let i = 0; i < data.length; i++) {
+							sendInput(data.charCodeAt(i));
+						}
+					}
+				});
+
+				// Run bash interactively
+				cx.run('/bin/bash', ['--login']);
+
+				// Small delay to let the shell initialize and display the prompt
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
+				terminal.writeln('\x1b[1;32m[System] Microterm Ready.\x1b[0m');
+			} catch (e: any) {
+				console.error('[Microterm Error]', e);
+				const msg = e?.message || e?.toString() || 'Unknown error';
+				terminal.writeln(`\x1b[1;31m[System Error] Failed to boot Microterm: ${msg}\x1b[0m`);
+				bootPromise = null; // Allow retry on failure
+			} finally {
+				isBooting = false;
+			}
+		})();
+
+		return bootPromise;
+	}
+
 	onMount(async () => {
 		// 1. Dynamically import xterm and its addons (only on client)
 		const [{ Terminal }, { FitAddon }] = await Promise.all([
@@ -56,70 +138,7 @@
 		terminal.open(terminalElement);
 		fitAddon.fit();
 
-		terminal.writeln('\x1b[1;34m[System] Initializing Microterm (WebVM/CheerpX)...\x1b[0m');
-
-		// 2. Load CheerpX Engine
-		if (!(window as any).CheerpX) {
-			await new Promise((resolve, reject) => {
-				const script = document.createElement('script');
-				script.src = 'https://cxrtnc.leaningtech.com/1.2.8/cx.js';
-				script.setAttribute('crossorigin', 'anonymous');
-				script.onload = resolve;
-				script.onerror = reject;
-				document.head.appendChild(script);
-			});
-		}
-
-		try {
-			// 3. Boot CheerpX
-			const CheerpX = (window as any).CheerpX;
-			if (!CheerpX) throw new Error('CheerpX engine failed to load from CDN');
-
-			// CloudDevice for the OS image
-			const cloudDevice = await CheerpX.CloudDevice.create('wss://disks.webvm.io/debian_large_20230522_5044875331.ext2');
-			
-			// IDBDevice + OverlayDevice to make the root filesystem writable (required for many bash operations)
-			const idbDevice = await CheerpX.IDBDevice.create('microterm_root');
-			const overlayDevice = await CheerpX.OverlayDevice.create(cloudDevice, idbDevice);
-			
-			// DataDevice for script injection
-			dataDevice = await CheerpX.DataDevice.create();
-
-			cx = await CheerpX.Linux.create({
-				mounts: [
-					{ type: 'ext2', path: '/', dev: overlayDevice },
-					{ type: 'dir', path: '/data', dev: dataDevice },
-					{ type: 'devs', path: '/dev' }
-				]
-			});
-
-			// 4. Connect Terminal
-			sendInput = cx.setCustomConsole(
-				(buf: Uint8Array) => {
-					terminal.write(new Uint8Array(buf));
-				},
-				terminal.cols,
-				terminal.rows
-			);
-
-			terminal.onData((data: string) => {
-				if (sendInput) {
-					for (let i = 0; i < data.length; i++) {
-						sendInput(data.charCodeAt(i));
-					}
-				}
-			});
-
-			// Run bash interactively
-			cx.run('/bin/bash', ['--login']);
-
-			terminal.writeln('\x1b[1;32m[System] Microterm Ready.\x1b[0m\r\n');
-			isBooting = false;
-		} catch (e: any) {
-			console.error('[Microterm Error]', e);
-			const msg = e?.message || e?.toString() || 'Unknown error';
-			terminal.writeln(`\x1b[1;31m[System Error] Failed to boot Microterm: ${msg}\x1b[0m`);
-		}
+		terminal.writeln('\x1b[1;34m[System] Terminal Ready. Defaulting to WebContainer for Node.js.\x1b[0m');
 	});
 
 	onDestroy(() => {
@@ -130,26 +149,39 @@
 		if (terminal) terminal.write(data);
 	}
 
+	export function clearTerminal() {
+		if (terminal) terminal.clear();
+	}
+
 	export async function runTest(code: string, language: string) {
-		if (!cx || !dataDevice || !sendInput) return;
+		if (!cx) {
+			await bootCheerpX();
+		}
+		if (!cx || !sendInput) return;
 
 		const filename = language === 'Python' ? 'test.py' : 'test.sh';
-		const cmd = language === 'Python' ? `python3 /data/${filename}` : `sh /data/${filename}`;
+		const tmpPath = `/tmp/${filename}`;
+		const cmd = language === 'Python' ? `python3 ${tmpPath}` : `sh ${tmpPath}`;
 
-		terminal.writeln(`\r\n\x1b[1;34m[System] Injecting and running ${language} script...\x1b[0m\r\n`);
+		terminal.writeln(`\x1b[1;34m[System] Running ${language} script...\x1b[0m`);
 
 		try {
-			// Inject file into /data
-			await dataDevice.writeFile(`/${filename}`, code);
+			const base64Code = btoa(unescape(encodeURIComponent(code)));
 			
-			// Execute the script
-			// We send the command to the shell input for visibility in the terminal
-			const runCmd = `${cmd}\n`;
+			// Inject the file silently using a separate background process.
+			// Using /bin/sh -c runs it non-interactively, which avoids the job control warning.
+			await cx.run('/bin/sh', ['-c', `base64 -d << 'EOF' > ${tmpPath}\n${base64Code}\nEOF`]);
+			
+			// Now that the file is injected, just run the command in the interactive shell.
+			// We prefix with \n to ensure we are at a clean prompt.
+			const runCmd = `\n${cmd}\n`;
 			for (let i = 0; i < runCmd.length; i++) {
 				sendInput(runCmd.charCodeAt(i));
 			}
 		} catch (e: any) {
-			terminal.writeln(`\x1b[1;31m[System Error] ${e.message}\x1b[0m\r\n`);
+			console.error('[runTest Error]', e);
+			const msg = e?.message || e?.toString() || 'Unknown error';
+			terminal.writeln(`\x1b[1;31m[System Error] ${msg}\x1b[0m`);
 		}
 	}
 </script>
