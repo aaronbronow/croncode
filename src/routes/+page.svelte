@@ -2,6 +2,7 @@
 	import ApiKeyInput from '$lib/components/ApiKeyInput.svelte';
 	import PromptInput from '$lib/components/PromptInput.svelte';
 	import ScriptEdit from '$lib/components/ScriptEdit.svelte';
+	import CronBuilder from '$lib/components/CronBuilder.svelte';
 	import { isDemoMode, appState, isAnyKeyVerified } from '$lib/keys.svelte';
 </script>
 
@@ -34,6 +35,12 @@
 			<div class="mb-8">
 				<ApiKeyInput />
 			</div>
+
+			<!-- Cron UI Builder -->
+			<div class="mb-8">
+				<CronBuilder />
+			</div>
+
 			<div class="grid gap-8 md:grid-cols-2">
 				<section>
 					<PromptInput />

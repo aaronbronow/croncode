@@ -44,6 +44,12 @@ When keys are provided via the environment, the server passes them to the client
 ### 2. In-App UI Configuration
 If no environment variables are provided, or if you wish to override them, you can enter your API keys directly in the application's UI. These keys are stored only in your browser's `localStorage`. This allows users of a shared deployment to use their own personal API keys securely without them being stored on the server.
 
+## Features
+
+- **AI Code Generation**: Instantly generate logic for recurring tasks using Gemini or Claude.
+- **Natural Language Cron Builder**: Configure complex schedules (e.g., "Every weekday at 6:00pm") using a command-palette style builder with live human-readable summaries and execution timelines.
+- **Hybrid VM Engine**: Test Node.js scripts in WebContainers and Python/Bash scripts in a full x86 virtualized Linux environment (CheerpX) directly in the browser.
+
 ## In-Browser Script Verification
 
 `croncode.ai` uses a **Hybrid Verification Engine** to allow you to test your generated scripts directly in the browser with high fidelity.

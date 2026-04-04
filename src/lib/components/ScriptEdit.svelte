@@ -79,10 +79,24 @@
 					lang={editorLang} 
 					styles={{
 						"&": {
-							backgroundColor: "#1e293b",
-							color: "#f1f5f9",
+							backgroundColor: "#002b36",
+							color: "#839496",
 							fontSize: "0.875rem",
 							minHeight: "100%"
+						},
+						".cm-content": {
+							caretColor: "#93a1a1"
+						},
+						".cm-cursor, .cm-dropCursor": {
+							borderLeftColor: "#93a1a1"
+						},
+						"&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
+							backgroundColor: "rgba(7, 54, 66, 0.9)"
+						},
+						".cm-gutters": {
+							backgroundColor: "#073642",
+							color: "#586e75",
+							border: "none"
 						}
 					}} 
 				/>

@@ -12,7 +12,7 @@
 		scriptState.result = '';
 		scriptState.executionOutput = '';
 
-		const systemPrompt = `Generate a ${scriptState.language} script. Do not use markdown blocks like \`\`\`python, just return the raw code. Output a single functional file.`;
+		const systemPrompt = `Generate a ${scriptState.language} script. Do not use markdown blocks like \`\`\`python, just return the raw code. Output a single functional file. Ignore any scheduling or timing logic requested by the user (e.g., 'run every day'), as the cron schedule is handled entirely by a separate Docker crontab system. Return ONLY the logic to be executed.`;
 		const userPrompt = promptText.trim();
 
 		try {
@@ -106,13 +106,16 @@
 	</div>
 
 	<div class="mb-4 flex-1">
-		<label for="prompt-textarea" class="mb-1 block text-sm font-medium text-slate-400">
-			Prompt
-		</label>
+		<div class="mb-1 flex items-baseline justify-between">
+			<label for="prompt-textarea" class="block text-sm font-medium text-slate-400">
+				Prompt
+			</label>
+			<span class="text-xs text-slate-500">Schedule is handled separately. Do not include timing (e.g., 'run every day').</span>
+		</div>
 		<textarea
 			id="prompt-textarea"
 			bind:value={promptText}
-			placeholder="e.g., Print Hello World"
+			placeholder="e.g., Fetch latest news from HackerNews"
 			class="h-48 w-full resize-y rounded border border-slate-600 bg-slate-800 px-3 py-2 font-mono text-sm text-slate-100 focus:border-blue-500 focus:outline-none md:h-64"
 		></textarea>
 	</div>
