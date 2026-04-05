@@ -23,9 +23,31 @@
 
 		if (runner) runner.clearTerminal();
 
+		// Save/Update history
+		if (scriptState.result.trim()) {
+			if (scriptState.activeScriptId) {
+				const entry = scriptState.history.find((e: any) => e.id === scriptState.activeScriptId);
+				if (entry) {
+					entry.code = scriptState.result;
+					entry.cron = scriptState.cron;
+					entry.language = scriptState.activeLanguage;
+				}
+			} else {
+				scriptState.activeScriptId = crypto.randomUUID();
+				scriptState.history.push({
+					id: scriptState.activeScriptId,
+					timestamp: new Date().toISOString(),
+					code: scriptState.result,
+					language: scriptState.activeLanguage,
+					cron: scriptState.cron
+				});
+			}
+		}
+
 		try {
 			// Use activeLanguage (what the code actually is) instead of language (the target preference)
 			const executionLanguage = scriptState.activeLanguage;
+
 			
 			if (executionLanguage === 'Node.js') {
 				if (runner) {

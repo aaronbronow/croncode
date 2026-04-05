@@ -49,6 +49,7 @@
 		"bits-ui": "^2.16.5",
 		"cron-parser": "^5.5.0",
 		"cronstrue": "^3.14.0",
-		"svelte-codemirror-editor": "^2.1.0"
+		"svelte-codemirror-editor": "^2.1.0",
+		"yaml": "^2.8.3"
 	}
 }

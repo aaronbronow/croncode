@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { keys, saveKeys, appState, setKeyVerified, setDefaultModel } from '$lib/keys.svelte';
+	import { keys, saveKeys, appState, setKeyVerified, setDefaultModel, isAnyKeyVerified } from '$lib/keys.svelte';
+
+	let { showConfig = $bindable(false) } = $props();
 
 	let geminiInput = $state(keys.gemini);
 	let claudeInput = $state(keys.claude);
-	let isEditing = $state(!keys.gemini && !keys.claude);
 
 	let isTestingGemini = $state(false);
 	let isTestingClaude = $state(false);
@@ -12,9 +13,11 @@
 
 	function handleSave() {
 		saveKeys(geminiInput, claudeInput);
-		isEditing = false;
 		geminiTestStatus = {};
 		claudeTestStatus = {};
+		if (isAnyKeyVerified.value) {
+			showConfig = false;
+		}
 	}
 
 	async function testGemini() {
@@ -84,75 +87,12 @@
 			isTestingClaude = false;
 		}
 	}
-
-	function handleEdit() {
-		isEditing = true;
-		geminiTestStatus = {};
-		claudeTestStatus = {};
-	}
 </script>
 
-{#if (appState.geminiVerified || appState.claudeVerified) && !isEditing}
-	<div class="rounded-lg border border-slate-700 bg-slate-900 p-4 shadow-xl">
-		<div class="flex items-center justify-between">
-			<div class="flex flex-wrap gap-4">
-				{#if appState.geminiVerified}
-					<div class="flex items-center gap-2">
-						<div class="h-2 w-2 rounded-full bg-green-500"></div>
-						<span class="text-sm font-medium text-green-400">Gemini Ready</span>
-					</div>
-				{/if}
-				{#if appState.claudeVerified}
-					<div class="flex items-center gap-2">
-						<div class="h-2 w-2 rounded-full bg-green-500"></div>
-						<span class="text-sm font-medium text-green-400">Claude Ready</span>
-					</div>
-				{/if}
-			</div>
-			<button onclick={handleEdit} class="text-sm text-blue-400 hover:text-blue-300 hover:underline">
-				Edit Configuration
-			</button>
-		</div>
-
-		{#if appState.geminiVerified && appState.claudeVerified}
-			<div class="mt-4 flex items-center gap-4 border-t border-slate-800 pt-4">
-				<span class="text-sm font-medium text-slate-400">Default Model:</span>
-				<div class="flex gap-4">
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input
-							type="radio"
-							name="defaultModel"
-							value="gemini"
-							checked={appState.defaultModel === 'gemini'}
-							onchange={() => setDefaultModel('gemini')}
-							class="text-blue-600"
-						/>
-						<span class="text-sm text-slate-200">Gemini</span>
-					</label>
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input
-							type="radio"
-							name="defaultModel"
-							value="claude"
-							checked={appState.defaultModel === 'claude'}
-							onchange={() => setDefaultModel('claude')}
-							class="text-blue-600"
-						/>
-						<span class="text-sm text-slate-200">Claude</span>
-					</label>
-				</div>
-			</div>
-		{/if}
-	</div>
-{:else}
+{#if showConfig || !isAnyKeyVerified.value}
 	<div class="rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-xl">
-		<div class="mb-4 flex items-center justify-between">
+		<div class="mb-4">
 			<h2 class="text-xl font-bold text-slate-100">API Configuration</h2>
-			{#if !isEditing && (appState.geminiVerified || appState.claudeVerified)}
-				<button onclick={handleEdit} class="text-sm text-blue-400 hover:text-blue-300 hover:underline">
-					Edit Keys
-				</button>
-			{/if}
 		</div>
 
 		<div class="space-y-6">
@@ -236,6 +176,36 @@
 				{/if}
 			</div>
 
+			{#if appState.geminiVerified && appState.claudeVerified}
+				<div class="mt-4 flex items-center gap-4 border-t border-slate-800 pt-4">
+					<span class="text-sm font-medium text-slate-400">Default Model:</span>
+					<div class="flex gap-4">
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input
+								type="radio"
+								name="defaultModel"
+								value="gemini"
+								checked={appState.defaultModel === 'gemini'}
+								onchange={() => setDefaultModel('gemini')}
+								class="text-blue-600"
+							/>
+							<span class="text-sm text-slate-200">Gemini</span>
+						</label>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input
+								type="radio"
+								name="defaultModel"
+								value="claude"
+								checked={appState.defaultModel === 'claude'}
+								onchange={() => setDefaultModel('claude')}
+								class="text-blue-600"
+							/>
+							<span class="text-sm text-slate-200">Claude</span>
+						</label>
+					</div>
+				</div>
+			{/if}
+
 			<div class="flex gap-3 pt-2">
 				<button
 					onclick={handleSave}
@@ -243,9 +213,9 @@
 				>
 					Save Configuration
 				</button>
-				{#if keys.gemini || keys.claude}
+				{#if isAnyKeyVerified.value}
 					<button
-						onclick={() => (isEditing = false)}
+						onclick={() => { showConfig = false; }}
 						class="rounded bg-slate-700 px-4 py-2 font-semibold text-slate-200 transition-colors hover:bg-slate-600"
 					>
 						Cancel

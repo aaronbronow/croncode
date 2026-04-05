@@ -3,10 +3,22 @@
 	import PromptInput from '$lib/components/PromptInput.svelte';
 	import ScriptEdit from '$lib/components/ScriptEdit.svelte';
 	import CronBuilder from '$lib/components/CronBuilder.svelte';
+	import SessionManager from '$lib/components/SessionManager.svelte';
+	import TopMenu from '$lib/components/TopMenu.svelte';
 	import { isDemoMode, appState, isAnyKeyVerified } from '$lib/keys.svelte';
+
+	let showHistory = $state(false);
+	let showApiConfig = $state(false);
 </script>
 
 <div class="min-h-screen bg-slate-950 px-4 py-12 font-sans text-slate-100 selection:bg-blue-500/30">
+	<div class="absolute right-8 top-8">
+		<TopMenu 
+			onToggleHistory={() => showHistory = !showHistory} 
+			onToggleApiConfig={() => showApiConfig = !showApiConfig}
+		/>
+	</div>
+
 	<main class="mx-auto max-w-5xl">
 		<header class="mb-12 text-center">
 			<h1
@@ -32,9 +44,14 @@
 		</header>
 
 		{#if isAnyKeyVerified.value}
-			<div class="mb-8">
-				<ApiKeyInput />
+			<div class="mb-8" id="api-config">
+				<ApiKeyInput bind:showConfig={showApiConfig} />
 			</div>
+
+			<!-- Session & History Manager (Always mounted to handle global drag events) -->
+			<section>
+				<SessionManager bind:showHistory />
+			</section>
 
 			<!-- Cron UI Builder -->
 			<div class="mb-8">
@@ -43,7 +60,7 @@
 
 			<div class="grid gap-8 md:grid-cols-2">
 				<section>
-					<PromptInput />
+					<PromptInput onToggleApiConfig={() => { showApiConfig = true; }} />
 				</section>
 				<section>
 					<ScriptEdit />
@@ -51,8 +68,8 @@
 			</div>
 		{:else}
 			<div class="grid gap-8 md:grid-cols-2">
-				<section>
-					<ApiKeyInput />
+				<section id="api-config">
+					<ApiKeyInput bind:showConfig={showApiConfig} />
 				</section>
 
 				<section class="flex flex-col justify-center rounded-lg border border-slate-800 p-6 text-center">

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { keys, appState } from '$lib/keys.svelte';
+	import { keys, appState, isAnyKeyVerified } from '$lib/keys.svelte';
 	import { scriptState } from '$lib/script.svelte';
 
-	let promptText = $state('');
+	let { onToggleApiConfig } = $props();
 
 	async function generateScript() {
-		if (!promptText.trim()) return;
+		if (!scriptState.promptText.trim()) return;
 
 		scriptState.isGenerating = true;
 		scriptState.error = '';
@@ -13,7 +13,7 @@
 		scriptState.executionOutput = '';
 
 		const systemPrompt = `Generate a ${scriptState.language} script. Do not use markdown blocks like \`\`\`python, just return the raw code. Output a single functional file. Ignore any scheduling or timing logic requested by the user (e.g., 'run every day'), as the cron schedule is handled entirely by a separate Docker crontab system. Return ONLY the logic to be executed.`;
-		const userPrompt = promptText.trim();
+		const userPrompt = scriptState.promptText.trim();
 
 		try {
 			if (appState.defaultModel === 'gemini') {
@@ -74,6 +74,19 @@
 				scriptState.result = text.trim();
 				scriptState.activeLanguage = scriptState.language;
 			}
+			
+			// Save to history
+			if (scriptState.result) {
+				scriptState.activeScriptId = crypto.randomUUID();
+				scriptState.history.push({
+					id: scriptState.activeScriptId,
+					timestamp: new Date().toISOString(),
+					prompt: scriptState.promptText.trim(),
+					code: scriptState.result,
+					language: scriptState.activeLanguage,
+					cron: scriptState.cron
+				});
+			}
 		} catch (e: any) {
 			scriptState.error = e.message || 'An unexpected error occurred.';
 		} finally {
@@ -85,9 +98,23 @@
 <div class="flex h-full flex-col rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-xl">
 	<div class="mb-4 flex items-center justify-between">
 		<h2 class="text-xl font-bold text-slate-100">Prompt Engine</h2>
-		<span class="text-xs font-medium text-slate-500 uppercase tracking-wider">
-			Using {appState.defaultModel}
-		</span>
+		<div class="flex items-center gap-2">
+			{#if isAnyKeyVerified.value}
+				<div class="h-2 w-2 rounded-full bg-green-500"></div>
+				<span class="text-xs font-medium text-green-400 uppercase tracking-wider">
+					{appState.defaultModel === 'gemini' ? 'Gemini' : 'Claude'} Ready
+				</span>
+			{:else}
+				<div class="h-2 w-2 rounded-full bg-slate-500"></div>
+				<a 
+					href="#api-config" 
+					onclick={(e) => { e.preventDefault(); onToggleApiConfig(); setTimeout(() => document.getElementById('api-config')?.scrollIntoView({ behavior: 'smooth' }), 50); }}
+					class="text-xs font-medium text-slate-500 uppercase tracking-wider hover:text-slate-400 underline decoration-slate-500/30"
+				>
+					Add API Key
+				</a>
+			{/if}
+		</div>
 	</div>
 
 	<div class="mb-4">
@@ -114,7 +141,7 @@
 		</div>
 		<textarea
 			id="prompt-textarea"
-			bind:value={promptText}
+			bind:value={scriptState.promptText}
 			placeholder="e.g., Fetch latest news from HackerNews"
 			class="h-48 w-full resize-y rounded border border-slate-600 bg-slate-800 px-3 py-2 font-mono text-sm text-slate-100 focus:border-blue-500 focus:outline-none md:h-64"
 		></textarea>
@@ -122,7 +149,7 @@
 
 	<button
 		onclick={generateScript}
-		disabled={scriptState.isGenerating || !promptText.trim()}
+		disabled={scriptState.isGenerating || !scriptState.promptText.trim()}
 		class="w-full rounded bg-blue-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-blue-500 disabled:opacity-50"
 	>
 		{scriptState.isGenerating ? 'Generating...' : 'Generate Script'}

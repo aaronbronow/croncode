@@ -61,7 +61,7 @@
 
 		// 2. Try parsing as natural language
 		try {
-			const result = cronned(term);
+			const result = cronned(term) as any;
 			if (result && result.crons && result.crons.length > 0) {
 				cronExpression = result.crons[0];
 				scriptState.cron = result.crons[0];
@@ -74,7 +74,7 @@
 		if (!term || isRawCron(term) || term.split(' ').length < 2) return null;
 		
 		try {
-			const result = cronned(term);
+			const result = cronned(term) as any;
 			if (result && result.crons && result.crons.length > 0) {
 				const cron = result.crons[0];
 				// Only return if it's different from current value
