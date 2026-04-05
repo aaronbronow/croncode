@@ -8,12 +8,7 @@
 	import { executeScript } from '$lib/webcontainer';
 	import MicrotermRunner from './MicrotermRunner.svelte';
 
-	interface Props {
-		onToggleDockerfile?: () => void;
-		showDockerfile?: boolean;
-	}
-
-	let { onToggleDockerfile, showDockerfile = false }: Props = $props();
+	let runner: any = $state(null);
 
 	const langs: Record<string, any> = {
 		'Node.js': javascript(),
@@ -22,7 +17,6 @@
 	};
 
 	let editorLang = $derived(langs[scriptState.language] || javascript());
-	let runner: any = $state(null);
 
 	async function handleTest() {
 		scriptState.executionOutput = ''; // Keep this for now for logic compatibility
@@ -87,15 +81,6 @@
 		<h3 class="text-sm font-bold text-slate-400">Source Editor</h3>
 		<div class="flex gap-2">
 			<button
-				onclick={onToggleDockerfile}
-				disabled={!scriptState.result.trim() || scriptState.isGenerating}
-				class="rounded border border-slate-700 px-3 py-1 text-sm font-medium {showDockerfile
-					? 'bg-slate-700 text-slate-200'
-					: 'text-slate-400'} transition-colors hover:bg-slate-800 hover:text-slate-200 disabled:opacity-50"
-			>
-				{showDockerfile ? 'Hide Dockerfile' : 'Show Dockerfile'}
-			</button>
-			<button
 				onclick={handleTest}
 				disabled={!scriptState.result.trim() || scriptState.isGenerating || scriptState.isExecuting}
 				class="rounded bg-slate-700 px-3 py-1 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600 disabled:opacity-50"
@@ -124,25 +109,26 @@
 					lang={editorLang}
 					styles={{
 						'&': {
-							backgroundColor: '#002b36',
-							color: '#839496',
-							fontSize: '0.875rem',
-							minHeight: '100%'
+							backgroundColor: '#020617', // slate-950
+							color: '#e2e8f0', // slate-200
+							fontSize: '0.8125rem', // slightly smaller (13px)
+							minHeight: '100%',
+							lineHeight: '1.4' // compact
 						},
 						'.cm-content': {
-							caretColor: '#93a1a1'
+							caretColor: '#3b82f6' // blue-500
 						},
 						'.cm-cursor, .cm-dropCursor': {
-							borderLeftColor: '#93a1a1'
+							borderLeftColor: '#3b82f6'
 						},
 						'&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
 							{
-								backgroundColor: 'rgba(7, 54, 66, 0.9)'
+								backgroundColor: 'rgba(59, 130, 246, 0.2)' // blue-500/20
 							},
 						'.cm-gutters': {
-							backgroundColor: '#073642',
-							color: '#586e75',
-							border: 'none'
+							backgroundColor: '#0f172a', // slate-900
+							color: '#475569', // slate-500
+							borderRight: '1px solid #1e293b' // slate-800
 						}
 					}}
 				/>
@@ -151,9 +137,41 @@
 	</div>
 
 	<div class="mt-4">
-		<h3 class="mb-2 text-xs font-medium tracking-wider text-slate-500 uppercase">
-			Terminal Output
-		</h3>
+		<div class="mb-2 flex items-center justify-between">
+			<h3 class="text-xs font-medium tracking-wider text-slate-500 uppercase">
+				Terminal Output
+			</h3>
+			<div class="flex items-center gap-4">
+				<div class="flex items-center gap-2">
+					<div
+						class="h-1.5 w-1.5 rounded-full {scriptState.webContainerReady
+							? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]'
+							: 'bg-slate-600'}"
+					></div>
+					<span
+						class="text-[10px] font-medium tracking-wider uppercase {scriptState.webContainerReady
+							? 'text-green-400'
+							: 'text-slate-600'}"
+					>
+						WebContainer {scriptState.webContainerReady ? 'Ready' : ''}
+					</span>
+				</div>
+				<div class="flex items-center gap-2">
+					<div
+						class="h-1.5 w-1.5 rounded-full {scriptState.webVmReady
+							? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]'
+							: 'bg-slate-600'}"
+					></div>
+					<span
+						class="text-[10px] font-medium tracking-wider uppercase {scriptState.webVmReady
+							? 'text-green-400'
+							: 'text-slate-600'}"
+					>
+						WebVM {scriptState.webVmReady ? 'Ready' : ''}
+					</span>
+				</div>
+			</div>
+		</div>
 		<div class="h-64 overflow-hidden rounded border border-slate-700 bg-[#002b36]">
 			<MicrotermRunner bind:this={runner} />
 		</div>

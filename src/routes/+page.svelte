@@ -88,19 +88,22 @@
 						/>
 					</section>
 					<section>
-						<ScriptEdit
-							onToggleDockerfile={() => (showDockerfile = !showDockerfile)}
-							{showDockerfile}
-						/>
+						<ScriptEdit />
 					</section>
 				</div>
 
-				{#if showDockerfile}
-					<div class="rounded-lg border border-slate-800 bg-slate-900 p-6 shadow-xl">
-						<div class="mb-4 flex items-center justify-between">
-							<h2 class="text-xs font-black tracking-[0.2em] text-slate-600 uppercase">
-								Docker Deployment
-							</h2>
+				<div class="rounded-lg border border-slate-800 bg-slate-900 p-6 shadow-xl">
+					<div class="mb-4 flex items-center justify-between">
+						<h2 class="text-xs font-black tracking-[0.2em] text-slate-600 uppercase">
+							Docker Deployment
+						</h2>
+						<div class="flex gap-4">
+							<button
+								onclick={() => (showDockerfile = !showDockerfile)}
+								class="text-xs font-medium text-slate-400 transition-colors hover:text-slate-200"
+							>
+								{showDockerfile ? 'Hide Dockerfile' : 'Show Dockerfile'}
+							</button>
 							<button
 								onclick={handleDownloadDockerfile}
 								class="text-xs font-medium text-blue-400 transition-colors hover:text-blue-300"
@@ -108,36 +111,46 @@
 								Download Dockerfile
 							</button>
 						</div>
+					</div>
 
-						<div class="mb-6 rounded border border-blue-500/20 bg-blue-500/5 p-4 text-sm text-slate-400">
-							<p class="mb-3">
-								To deploy your script, download the Dockerfile and use these commands to build and run:
-							</p>
-							<div class="space-y-4">
-								<div>
-									<span class="mb-1 block text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-										Build and Start Cron
-									</span>
-									<div class="rounded bg-slate-950 p-3 font-mono text-xs text-blue-300">
-										docker build -t croncode -f Dockerfile . && docker run --rm croncode
-									</div>
+					<div
+						class="mb-6 rounded border border-blue-500/20 bg-blue-500/5 p-4 text-sm text-slate-400"
+					>
+						<p class="mb-3">
+							To deploy your script, download the Dockerfile and use these commands to build and
+							run:
+						</p>
+						<div class="space-y-4">
+							<div>
+								<span
+									class="mb-1 block text-[10px] font-bold tracking-wider text-slate-500 uppercase"
+								>
+									Build and Start Cron
+								</span>
+								<div class="rounded bg-slate-950 p-3 font-mono text-xs text-blue-300">
+									docker build -t croncode -f Dockerfile . && docker run --rm --network host croncode
+								</div>
 								</div>
 								<div>
-									<span class="mb-1 block text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-										Run Immediately (Bypass Cron)
-									</span>
-									<div class="rounded bg-slate-950 p-3 font-mono text-xs text-indigo-300">
-										docker run --rm croncode {dockerConfig.runCommand}
-									</div>
+								<span class="mb-1 block text-[10px] font-bold tracking-wider text-slate-500 uppercase">
+									Run Immediately (Bypass Cron)
+								</span>
+								<div class="rounded bg-slate-950 p-3 font-mono text-xs text-indigo-300">
+									docker run --rm --network host croncode {dockerConfig.runCommand}
 								</div>
 							</div>
 						</div>
-
-						<div class="max-h-96 overflow-auto rounded border border-slate-700 bg-[#073642] p-4 text-sm">
-							<pre class="whitespace-pre-wrap font-mono text-[#839496]">{dockerConfig.dockerfile}</pre>
-						</div>
 					</div>
-				{/if}
+
+					{#if showDockerfile}
+						<div
+							class="max-h-96 overflow-auto rounded border border-slate-700 bg-slate-950 p-4 text-sm"
+						>
+							<pre class="whitespace-pre-wrap font-mono text-slate-300">{dockerConfig.dockerfile}</pre>
+						</div>
+
+					{/if}
+				</div>
 			</div>
 		{:else}
 			<div class="space-y-8">

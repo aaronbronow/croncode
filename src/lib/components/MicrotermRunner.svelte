@@ -11,27 +11,27 @@
 	let session: any = null;
 	let isBooting = $state(false);
 
-	// Solarized Dark Theme for xterm.js
-	const solarizedDark = {
-		background: '#002b36',
-		foreground: '#839496',
-		cursor: '#93a1a1',
-		black: '#073642',
-		red: '#dc322f',
-		green: '#859900',
-		yellow: '#b58900',
-		blue: '#268bd2',
-		magenta: '#d33682',
-		cyan: '#2aa198',
-		white: '#eee8d5',
-		brightBlack: '#002b36',
-		brightRed: '#cb4b16',
-		brightGreen: '#586e75',
-		brightYellow: '#657b83',
-		brightBlue: '#839496',
-		brightMagenta: '#6c71c4',
-		brightCyan: '#93a1a1',
-		brightWhite: '#fdf6e3'
+	// Slate Dark Theme for xterm.js
+	const slateDark = {
+		background: '#020617', // slate-950
+		foreground: '#e2e8f0', // slate-200
+		cursor: '#3b82f6', // blue-500
+		black: '#0f172a', // slate-900
+		red: '#f87171', // red-400
+		green: '#4ade80', // green-400
+		yellow: '#fbbf24', // yellow-400
+		blue: '#60a5fa', // blue-400
+		magenta: '#f472b6', // pink-400
+		cyan: '#22d3ee', // cyan-400
+		white: '#f1f5f9', // slate-100
+		brightBlack: '#475569', // slate-500
+		brightRed: '#ef4444', // red-500
+		brightGreen: '#22c55e', // green-500
+		brightYellow: '#f59e0b', // yellow-500
+		brightBlue: '#3b82f6', // blue-500
+		brightMagenta: '#ec4899', // pink-500
+		brightCyan: '#06b6d4', // cyan-500
+		brightWhite: '#ffffff'
 	};
 
 	let bootPromise: Promise<void> | null = null;
@@ -104,6 +104,7 @@
 				// Small delay to let the shell initialize and display the prompt
 				await new Promise((resolve) => setTimeout(resolve, 500));
 
+				scriptState.webVmReady = true;
 				terminal.writeln('\x1b[1;32m[System] Microterm Ready.\x1b[0m');
 			} catch (e: any) {
 				console.error('[Microterm Error]', e);
@@ -130,8 +131,8 @@
 		terminal = new Terminal({
 			cursorBlink: true,
 			convertEol: true,
-			theme: solarizedDark,
-			fontSize: 13,
+			theme: slateDark,
+			fontSize: 12, // slightly more compact
 			fontFamily: 'Menlo, Monaco, "Courier New", monospace',
 			rows: 20
 		});
@@ -207,6 +208,6 @@
 
 <style>
 	:global(.xterm-viewport) {
-		background-color: #002b36 !important;
+		background-color: #020617 !important;
 	}
 </style>

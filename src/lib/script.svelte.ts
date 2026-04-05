@@ -18,7 +18,9 @@ const DEFAULT_STATE = {
 	error: '',
 	executionOutput: '',
 	activeScriptId: null as string | null,
-	history: [] as HistoryEntry[]
+	history: [] as HistoryEntry[],
+	webContainerReady: false,
+	webVmReady: false
 };
 
 function loadState() {

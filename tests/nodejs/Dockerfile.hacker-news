@@ -1,0 +1,79 @@
+FROM node:20-alpine
+
+# Alpine images include crond (busybox) by default. 
+# No extra package installation needed, maximizing portability.
+
+WORKDIR /app
+
+# Create the script file
+RUN cat <<'EOF' > /app/script.js
+async function getHackerNewsHeadlines() {
+    const TOP_STORIES_URL = 'https://hacker-news.firebaseio.com/v0/topstories.json';
+    const ITEM_URL_BASE = 'https://hacker-news.firebaseio.com/v0/item/';
+    const NUM_HEADLINES_TO_FETCH = 10; // Fetch details for the top N stories
+
+    try {
+        // 1. Fetch the IDs of the top stories
+        const responseIds = await fetch(TOP_STORIES_URL);
+        if (!responseIds.ok) {
+            throw new Error(`Failed to fetch top story IDs: HTTP status ${responseIds.status}`);
+        }
+        const storyIds = await responseIds.json();
+
+        // 2. Limit to the desired number of headlines and fetch their details concurrently
+        const headlinesPromises = storyIds.slice(0, NUM_HEADLINES_TO_FETCH).map(async (id) => {
+            const itemResponse = await fetch(`${ITEM_URL_BASE}${id}.json`);
+            if (!itemResponse.ok) {
+                console.error(`Warning: Failed to fetch details for story ID ${id}. HTTP status: ${itemResponse.status}`);
+                return null; // Return null for failed items to prevent breaking the whole process
+            }
+            const item = await itemResponse.json();
+            return item ? item.title : null; // Return title or null if item is malformed
+        });
+
+        // 3. Wait for all individual story fetches to complete
+        const headlines = await Promise.all(headlinesPromises);
+
+        // 4. Print each valid headline
+        console.log("Latest Hacker News Headlines:");
+        headlines.filter(title => title).forEach((title, index) => {
+            console.log(`${index + 1}. ${title}`);
+        });
+
+    } catch (error) {
+        console.error('An error occurred while fetching Hacker News headlines:', error);
+    }
+}
+
+// Execute the main function
+getHackerNewsHeadlines();
+EOF
+
+# Create the entrypoint script
+RUN cat <<'EOF' > /usr/local/bin/run.sh
+#!/bin/sh
+
+# Export environment variables for cron
+env | grep -v 'HOME' | grep -v 'PWD' | grep -v 'PATH' | grep -v 'SHLVL' > /etc/environment
+
+# If arguments are provided, execute them directly (bypass cron)
+if [ $# -gt 0 ]; then
+    exec "$@"
+fi
+
+# Setup crontab (Alpine Busybox path)
+mkdir -p /var/spool/cron/crontabs
+echo "*/15 * * * * node /app/script.js >> /var/log/cron.log 2>&1" > /var/spool/cron/crontabs/root
+
+# Ensure permissions
+chmod 0600 /var/spool/cron/crontabs/root
+touch /var/log/cron.log
+
+# Run cron in foreground
+echo "Starting cron with schedule: */15 * * * *"
+exec crond -f -l 2
+EOF
+
+RUN chmod +x /usr/local/bin/run.sh /app/script.js
+
+ENTRYPOINT ["/usr/local/bin/run.sh"]
