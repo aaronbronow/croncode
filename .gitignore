@@ -24,4 +24,5 @@ vite.config.ts.timestamp-*
 
 GEMINI.md
 PLAN.md
-/.vscodetests/tmp/
+/.vscode
+tests/tmp/

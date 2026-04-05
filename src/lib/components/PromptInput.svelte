@@ -12,7 +12,12 @@
 		scriptState.result = '';
 		scriptState.executionOutput = '';
 
-		const systemPrompt = `Generate a ${scriptState.language} script. Do not use markdown blocks like \`\`\`python, just return the raw code. Output a single functional file. Ignore any scheduling or timing logic requested by the user (e.g., 'run every day'), as the cron schedule is handled entirely by a separate Docker crontab system. Return ONLY the logic to be executed.`;
+		let systemPrompt = `Generate a ${scriptState.language} script. Do not use markdown blocks like \`\`\`${scriptState.language === 'Node.js' ? 'javascript' : scriptState.language.toLowerCase()}, just return the raw code. Output a single functional file. Prefer using the language's standard library for all tasks (e.g., 'urllib' in Python, native 'fetch' in Node.js) to avoid the need for external package managers. Only use external packages if the standard library implementation would be excessively complex or bloated. Ignore any scheduling or timing logic requested by the user (e.g., 'run every day'), as the cron schedule is handled entirely by a separate Docker crontab system. Return ONLY the logic to be executed.`;
+
+		if (scriptState.language === 'Bash') {
+			systemPrompt += " Always include 'set -euo pipefail' at the beginning of Bash scripts for robustness.";
+		}
+
 		const userPrompt = scriptState.promptText.trim();
 
 		try {

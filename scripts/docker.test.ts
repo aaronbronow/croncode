@@ -34,6 +34,14 @@ const languages = [
 		runCommand: 'python3 /app/script.py'
 	},
 	{
+		name: 'Python Hacker News',
+		expected: 'Latest Hacker News Headlines:',
+		dockerfileName: 'Dockerfile.hacker-news',
+		isPreExisting: true,
+		sourceDir: 'python',
+		runCommand: 'python3 /app/script.py'
+	},
+	{
 		name: 'Bash Hello World',
 		expected: 'hello world',
 		dockerfileName: 'Dockerfile.hello-world',
