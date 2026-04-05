@@ -118,6 +118,7 @@
 </script>
 
 <div class="rounded-lg border border-slate-800 bg-slate-900 p-6 shadow-xl space-y-4">
+	<h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-600">Cron</h2>
 	<div class="grid gap-4 md:grid-cols-[1fr_10rem]">
 		<!-- Column 1: Every... (Command Palette) -->
 		<div class="relative" onfocusout={handleFocusOut}>

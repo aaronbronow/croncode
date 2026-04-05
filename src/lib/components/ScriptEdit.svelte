@@ -76,9 +76,9 @@
 	}
 </script>
 
-<div class="flex h-full flex-col rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-xl">
+<div class="flex flex-col border-t border-slate-800 pt-8 mt-8">
 	<div class="mb-4 flex items-center justify-between">
-		<h2 class="text-xl font-bold text-slate-100">Script</h2>
+		<h3 class="text-sm font-bold text-slate-400">Source Editor</h3>
 		<button
 			onclick={handleTest}
 			disabled={!scriptState.result.trim() || scriptState.isGenerating || scriptState.isExecuting}
@@ -91,11 +91,11 @@
 	<div class="mb-4 flex-1">
 		<label for="script-editor" class="sr-only">Script Editor</label>
 		{#if scriptState.isGenerating}
-			<div class="flex h-48 items-center justify-center rounded border border-slate-700 bg-slate-800/50 md:h-64">
+			<div class="flex h-96 items-center justify-center rounded border border-slate-700 bg-slate-800/50 md:h-[32rem]">
 				<div class="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
 			</div>
 		{:else}
-			<div class="rounded border border-slate-600 focus-within:border-blue-500 overflow-auto h-48 md:h-64">
+			<div class="rounded border border-slate-700 focus-within:border-blue-500/50 overflow-auto h-96 md:h-[32rem]">
 				<CodeMirror 
 					bind:value={scriptState.result} 
 					lang={editorLang} 
@@ -126,8 +126,8 @@
 		{/if}
 	</div>
 
-	<div class="mt-auto">
-		<h3 class="mb-2 text-sm font-medium text-slate-400">Terminal Output</h3>
+	<div class="mt-4">
+		<h3 class="mb-2 text-xs font-medium text-slate-500 uppercase tracking-wider">Terminal Output</h3>
 		<div class="h-64 overflow-hidden rounded border border-slate-700 bg-[#002b36]">
 			<MicrotermRunner bind:this={runner} />
 		</div>

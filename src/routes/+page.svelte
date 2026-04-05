@@ -58,7 +58,8 @@
 				<CronBuilder />
 			</div>
 
-			<div class="grid gap-8 md:grid-cols-2">
+			<div class="rounded-lg border border-slate-800 bg-slate-900 p-6 shadow-xl space-y-8">
+				<h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-600">Code</h2>
 				<section>
 					<PromptInput onToggleApiConfig={() => { showApiConfig = true; }} />
 				</section>
@@ -67,7 +68,7 @@
 				</section>
 			</div>
 		{:else}
-			<div class="grid gap-8 md:grid-cols-2">
+			<div class="space-y-8">
 				<section id="api-config">
 					<ApiKeyInput bind:showConfig={showApiConfig} />
 				</section>

@@ -95,9 +95,9 @@
 	}
 </script>
 
-<div class="flex h-full flex-col rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-xl">
+<div class="flex flex-col">
 	<div class="mb-4 flex items-center justify-between">
-		<h2 class="text-xl font-bold text-slate-100">Prompt Engine</h2>
+		<h3 class="text-sm font-bold text-slate-400">Prompt Engine</h3>
 		<div class="flex items-center gap-2">
 			{#if isAnyKeyVerified.value}
 				<div class="h-2 w-2 rounded-full bg-green-500"></div>
@@ -118,42 +118,44 @@
 	</div>
 
 	<div class="mb-4">
-		<label for="language-select" class="mb-1 block text-sm font-medium text-slate-400">
-			Language
-		</label>
-		<select
-			id="language-select"
-			bind:value={scriptState.language}
-			class="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 focus:border-blue-500 focus:outline-none"
-		>
-			<option value="Node.js">Node.js</option>
-			<option value="Python">Python</option>
-			<option value="Bash">Bash</option>
-		</select>
-	</div>
-
-	<div class="mb-4 flex-1">
 		<div class="mb-1 flex items-baseline justify-between">
-			<label for="prompt-textarea" class="block text-sm font-medium text-slate-400">
-				Prompt
+			<label for="prompt-textarea" class="block text-xs font-medium text-slate-500 uppercase tracking-wider">
+				Instructions
 			</label>
-			<span class="text-xs text-slate-500">Schedule is handled separately. Do not include timing (e.g., 'run every day').</span>
+			<span class="text-[10px] text-slate-600">Schedule is handled in the Cron panel.</span>
 		</div>
 		<textarea
 			id="prompt-textarea"
 			bind:value={scriptState.promptText}
 			placeholder="e.g., Fetch latest news from HackerNews"
-			class="h-48 w-full resize-y rounded border border-slate-600 bg-slate-800 px-3 py-2 font-mono text-sm text-slate-100 focus:border-blue-500 focus:outline-none md:h-64"
+			class="h-24 w-full resize-y rounded border border-slate-700 bg-slate-800/50 px-3 py-2 font-mono text-sm text-slate-100 focus:border-blue-500/50 focus:outline-none md:h-32"
 		></textarea>
 	</div>
 
-	<button
-		onclick={generateScript}
-		disabled={scriptState.isGenerating || !scriptState.promptText.trim()}
-		class="w-full rounded bg-blue-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-blue-500 disabled:opacity-50"
-	>
-		{scriptState.isGenerating ? 'Generating...' : 'Generate Script'}
-	</button>
+	<div class="flex flex-col gap-4 sm:flex-row sm:items-end">
+		<div class="flex-1">
+			<label for="language-select" class="mb-1 block text-xs font-medium text-slate-500 uppercase tracking-wider">
+				Language
+			</label>
+			<select
+				id="language-select"
+				bind:value={scriptState.language}
+				class="w-full rounded border border-slate-700 bg-slate-800/50 px-3 py-2 text-slate-100 focus:border-blue-500 focus:outline-none"
+			>
+				<option value="Node.js">Node.js</option>
+				<option value="Python">Python</option>
+				<option value="Bash">Bash</option>
+			</select>
+		</div>
+
+		<button
+			onclick={generateScript}
+			disabled={scriptState.isGenerating || !scriptState.promptText.trim()}
+			class="flex-[2] rounded bg-blue-600 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-blue-500 disabled:opacity-50"
+		>
+			{scriptState.isGenerating ? 'Generating...' : 'Generate Script'}
+		</button>
+	</div>
 
 	{#if scriptState.error}
 		<div class="mt-4 rounded border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
