@@ -8,7 +8,8 @@ export const keys = $state({
 export const appState = $state({
 	geminiVerified: (browser && localStorage.getItem('GEMINI_KEY_VERIFIED') === 'true') || false,
 	claudeVerified: (browser && localStorage.getItem('CLAUDE_KEY_VERIFIED') === 'true') || false,
-	defaultModel: (browser && (localStorage.getItem('DEFAULT_MODEL') as 'gemini' | 'claude')) || 'gemini'
+	defaultModel:
+		(browser && (localStorage.getItem('DEFAULT_MODEL') as 'gemini' | 'claude')) || 'gemini'
 });
 
 export const isAnyKeyVerified = {

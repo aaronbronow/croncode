@@ -7,7 +7,7 @@
 	let showSuggestions = $state(false);
 	let nlInput = $state('');
 	let isNlFocused = $state(false);
-	
+
 	const suggestions = [
 		{ label: 'minute', cron: '* * * * *' },
 		{ label: 'hour', cron: '0 * * * *' },
@@ -57,14 +57,16 @@
 		try {
 			const result = cronned(query) as any;
 			if (result && result.crons && result.crons.length > 0) {
-				// Only return the cron if it's not the default * * * * * 
+				// Only return the cron if it's not the default * * * * *
 				// UNLESS the user actually typed "minute"
 				const cron = result.crons[0];
 				if (cron !== '* * * * *' || term.includes('min')) {
 					return cron;
 				}
 			}
-		} catch { /* ignore */ }
+		} catch {
+			/* ignore */
+		}
 		return null;
 	}
 
@@ -76,7 +78,7 @@
 		}
 	}
 
-	function selectSuggestion(suggestion: { label: string, cron: string }) {
+	function selectSuggestion(suggestion: { label: string; cron: string }) {
 		scriptState.cron = suggestion.cron;
 		nlInput = suggestion.label;
 		showSuggestions = false;
@@ -85,9 +87,7 @@
 	let filteredSuggestions = $derived.by(() => {
 		const term = nlInput.toLowerCase().trim();
 		if (!term) return suggestions;
-		return suggestions.filter(s => 
-			s.label.toLowerCase().includes(term)
-		);
+		return suggestions.filter((s) => s.label.toLowerCase().includes(term));
 	});
 
 	function handleFocusOut(e: FocusEvent) {
@@ -117,12 +117,15 @@
 	}
 </script>
 
-<div class="rounded-lg border border-slate-800 bg-slate-900 p-6 shadow-xl space-y-4">
-	<h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-600">Cron</h2>
+<div class="space-y-4 rounded-lg border border-slate-800 bg-slate-900 p-6 shadow-xl">
+	<h2 class="text-xs font-black tracking-[0.2em] text-slate-600 uppercase">Cron</h2>
 	<div class="grid gap-4 md:grid-cols-[1fr_10rem]">
 		<!-- Column 1: Every... (Command Palette) -->
 		<div class="relative" onfocusout={handleFocusOut}>
-			<label for="every-input" class="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">
+			<label
+				for="every-input"
+				class="mb-1 block text-xs font-bold tracking-wider text-slate-500 uppercase"
+			>
 				Every...
 			</label>
 			<input
@@ -130,20 +133,25 @@
 				type="text"
 				bind:value={nlInput}
 				oninput={(e) => handleNLInput(e.currentTarget.value)}
-				onfocus={() => { showSuggestions = true; isNlFocused = true; }}
+				onfocus={() => {
+					showSuggestions = true;
+					isNlFocused = true;
+				}}
 				placeholder="minute"
-				class="w-full rounded border border-slate-700 bg-slate-800 px-3 py-2 text-slate-100 focus:border-blue-500 focus:outline-none transition-colors"
+				class="w-full rounded border border-slate-700 bg-slate-800 px-3 py-2 text-slate-100 transition-colors focus:border-blue-500 focus:outline-none"
 			/>
-			
+
 			{#if showSuggestions && filteredSuggestions.length > 0}
-				<div class="absolute left-0 right-0 top-full z-50 mt-1 max-h-48 overflow-y-auto rounded border border-slate-700 bg-slate-900 shadow-2xl">
+				<div
+					class="absolute top-full right-0 left-0 z-50 mt-1 max-h-48 overflow-y-auto rounded border border-slate-700 bg-slate-900 shadow-2xl"
+				>
 					{#each filteredSuggestions as suggestion}
 						<button
 							onclick={() => selectSuggestion(suggestion)}
 							class="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
 						>
 							<span>{suggestion.label}</span>
-							<span class="text-[10px] font-mono text-slate-500">{suggestion.cron}</span>
+							<span class="font-mono text-[10px] text-slate-500">{suggestion.cron}</span>
 						</button>
 					{/each}
 				</div>
@@ -152,7 +160,10 @@
 
 		<!-- Column 2: Expression... (Cron Syntax) -->
 		<div class="min-w-0">
-			<label for="expression-input" class="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">
+			<label
+				for="expression-input"
+				class="mb-1 block text-xs font-bold tracking-wider text-slate-500 uppercase"
+			>
 				Expression...
 			</label>
 			<input
@@ -161,37 +172,39 @@
 				bind:value={scriptState.cron}
 				onblur={handleCronBlur}
 				placeholder="* * * * *"
-				class="w-full rounded border border-slate-700 bg-slate-800 px-3 py-2 font-mono text-sm text-blue-400 focus:border-blue-500 focus:outline-none transition-colors"
+				class="w-full rounded border border-slate-700 bg-slate-800 px-3 py-2 font-mono text-sm text-blue-400 transition-colors focus:border-blue-500 focus:outline-none"
 			/>
 		</div>
 	</div>
 
 	<!-- Row 2: Next run at... -->
 	<div class="relative">
-		<span class="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
+		<span class="mb-2 block text-xs font-bold tracking-wider text-slate-500 uppercase">
 			Next run at...
 		</span>
-		
+
 		<div class="relative">
-			<div class="flex gap-6 overflow-hidden whitespace-nowrap pr-12">
+			<div class="flex gap-6 overflow-hidden pr-12 whitespace-nowrap">
 				{#if nextRuns.length > 0}
 					{#each nextRuns as run}
 						<div class="flex flex-col border-l border-slate-700 pl-3 first:border-0 first:pl-0">
-							<span class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+							<span class="text-[10px] font-bold tracking-tighter text-slate-500 uppercase">
 								{run.toLocaleString(undefined, { month: 'short', day: 'numeric' })}
 							</span>
-							<span class="text-sm font-mono text-slate-300">
+							<span class="font-mono text-sm text-slate-300">
 								{run.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' })}
 							</span>
 						</div>
 					{/each}
 				{:else}
-					<div class="text-xs italic text-slate-600">Invalid expression</div>
+					<div class="text-xs text-slate-600 italic">Invalid expression</div>
 				{/if}
 			</div>
-			
+
 			<!-- Fade-out mask -->
-			<div class="absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-slate-900 pointer-events-none"></div>
+			<div
+				class="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-slate-900"
+			></div>
 		</div>
 	</div>
 </div>

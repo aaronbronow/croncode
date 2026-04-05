@@ -74,7 +74,7 @@
 				scriptState.result = text.trim();
 				scriptState.activeLanguage = scriptState.language;
 			}
-			
+
 			// Save to history
 			if (scriptState.result) {
 				scriptState.activeScriptId = crypto.randomUUID();
@@ -101,15 +101,22 @@
 		<div class="flex items-center gap-2">
 			{#if isAnyKeyVerified.value}
 				<div class="h-2 w-2 rounded-full bg-green-500"></div>
-				<span class="text-xs font-medium text-green-400 uppercase tracking-wider">
+				<span class="text-xs font-medium tracking-wider text-green-400 uppercase">
 					{appState.defaultModel === 'gemini' ? 'Gemini' : 'Claude'} Ready
 				</span>
 			{:else}
 				<div class="h-2 w-2 rounded-full bg-slate-500"></div>
-				<a 
-					href="#api-config" 
-					onclick={(e) => { e.preventDefault(); onToggleApiConfig(); setTimeout(() => document.getElementById('api-config')?.scrollIntoView({ behavior: 'smooth' }), 50); }}
-					class="text-xs font-medium text-slate-500 uppercase tracking-wider hover:text-slate-400 underline decoration-slate-500/30"
+				<a
+					href="#api-config"
+					onclick={(e) => {
+						e.preventDefault();
+						onToggleApiConfig();
+						setTimeout(
+							() => document.getElementById('api-config')?.scrollIntoView({ behavior: 'smooth' }),
+							50
+						);
+					}}
+					class="text-xs font-medium tracking-wider text-slate-500 uppercase underline decoration-slate-500/30 hover:text-slate-400"
 				>
 					Add API Key
 				</a>
@@ -119,7 +126,10 @@
 
 	<div class="mb-4">
 		<div class="mb-1 flex items-baseline justify-between">
-			<label for="prompt-textarea" class="block text-xs font-medium text-slate-500 uppercase tracking-wider">
+			<label
+				for="prompt-textarea"
+				class="block text-xs font-medium tracking-wider text-slate-500 uppercase"
+			>
 				Instructions
 			</label>
 			<span class="text-[10px] text-slate-600">Schedule is handled in the Cron panel.</span>
@@ -134,7 +144,10 @@
 
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-end">
 		<div class="flex-1">
-			<label for="language-select" class="mb-1 block text-xs font-medium text-slate-500 uppercase tracking-wider">
+			<label
+				for="language-select"
+				class="mb-1 block text-xs font-medium tracking-wider text-slate-500 uppercase"
+			>
 				Language
 			</label>
 			<select

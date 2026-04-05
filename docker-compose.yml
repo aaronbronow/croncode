@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    network_mode: "host"
+    network_mode: 'host'
     environment:
       - VITE_ALLOWED_HOSTS=${VITE_ALLOWED_HOSTS:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}

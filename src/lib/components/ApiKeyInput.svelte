@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { keys, saveKeys, appState, setKeyVerified, setDefaultModel, isAnyKeyVerified } from '$lib/keys.svelte';
+	import {
+		keys,
+		saveKeys,
+		appState,
+		setKeyVerified,
+		setDefaultModel,
+		isAnyKeyVerified
+	} from '$lib/keys.svelte';
 
 	let { showConfig = $bindable(false) } = $props();
 
@@ -128,9 +135,7 @@
 					</button>
 				</div>
 				{#if geminiTestStatus.message}
-					<p
-						class="mt-1 text-xs {geminiTestStatus.success ? 'text-green-400' : 'text-red-400'}"
-					>
+					<p class="mt-1 text-xs {geminiTestStatus.success ? 'text-green-400' : 'text-red-400'}">
 						{geminiTestStatus.message}
 					</p>
 				{/if}
@@ -168,9 +173,7 @@
 					</button>
 				</div>
 				{#if claudeTestStatus.message}
-					<p
-						class="mt-1 text-xs {claudeTestStatus.success ? 'text-green-400' : 'text-red-400'}"
-					>
+					<p class="mt-1 text-xs {claudeTestStatus.success ? 'text-green-400' : 'text-red-400'}">
 						{claudeTestStatus.message}
 					</p>
 				{/if}
@@ -180,7 +183,7 @@
 				<div class="mt-4 flex items-center gap-4 border-t border-slate-800 pt-4">
 					<span class="text-sm font-medium text-slate-400">Default Model:</span>
 					<div class="flex gap-4">
-						<label class="flex items-center gap-2 cursor-pointer">
+						<label class="flex cursor-pointer items-center gap-2">
 							<input
 								type="radio"
 								name="defaultModel"
@@ -191,7 +194,7 @@
 							/>
 							<span class="text-sm text-slate-200">Gemini</span>
 						</label>
-						<label class="flex items-center gap-2 cursor-pointer">
+						<label class="flex cursor-pointer items-center gap-2">
 							<input
 								type="radio"
 								name="defaultModel"
@@ -215,7 +218,9 @@
 				</button>
 				{#if isAnyKeyVerified.value}
 					<button
-						onclick={() => { showConfig = false; }}
+						onclick={() => {
+							showConfig = false;
+						}}
 						class="rounded bg-slate-700 px-4 py-2 font-semibold text-slate-200 transition-colors hover:bg-slate-600"
 					>
 						Cancel

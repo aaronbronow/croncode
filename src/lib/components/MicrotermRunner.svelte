@@ -62,12 +62,14 @@
 				if (!CheerpX) throw new Error('CheerpX engine failed to load from CDN');
 
 				// CloudDevice for the OS image
-				const cloudDevice = await CheerpX.CloudDevice.create('wss://disks.webvm.io/debian_large_20230522_5044875331.ext2');
-				
+				const cloudDevice = await CheerpX.CloudDevice.create(
+					'wss://disks.webvm.io/debian_large_20230522_5044875331.ext2'
+				);
+
 				// IDBDevice + OverlayDevice to make the root filesystem writable (required for many bash operations)
 				const idbDevice = await CheerpX.IDBDevice.create('microterm_root');
 				const overlayDevice = await CheerpX.OverlayDevice.create(cloudDevice, idbDevice);
-				
+
 				// DataDevice for script injection
 				dataDevice = await CheerpX.DataDevice.create();
 
@@ -138,7 +140,9 @@
 		terminal.open(terminalElement);
 		fitAddon.fit();
 
-		terminal.writeln('\x1b[1;34m[System] Terminal Ready. Defaulting to WebContainer for Node.js.\x1b[0m');
+		terminal.writeln(
+			'\x1b[1;34m[System] Terminal Ready. Defaulting to WebContainer for Node.js.\x1b[0m'
+		);
 	});
 
 	onDestroy(() => {
@@ -167,11 +171,11 @@
 
 		try {
 			const base64Code = btoa(unescape(encodeURIComponent(code)));
-			
+
 			// Inject the file silently using a separate background process.
 			// Using /bin/sh -c runs it non-interactively, which avoids the job control warning.
 			await cx.run('/bin/sh', ['-c', `base64 -d << 'EOF' > ${tmpPath}\n${base64Code}\nEOF`]);
-			
+
 			// Now that the file is injected, just run the command in the interactive shell.
 			// We prefix with \n to ensure we are at a clean prompt.
 			const runCmd = `\n${cmd}\n`;
@@ -186,14 +190,19 @@
 	}
 </script>
 
-<div class="flex flex-col h-full">
+<div class="flex h-full flex-col">
 	{#if isBooting}
-		<div class="flex items-center gap-3 mb-2 px-2">
-			<div class="h-3 w-3 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+		<div class="mb-2 flex items-center gap-3 px-2">
+			<div
+				class="h-3 w-3 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"
+			></div>
 			<span class="text-xs font-medium text-slate-500">Booting Alpine guest...</span>
 		</div>
 	{/if}
-	<div bind:this={terminalElement} class="flex-1 overflow-hidden rounded bg-[#002b36] p-2 border border-slate-700"></div>
+	<div
+		bind:this={terminalElement}
+		class="flex-1 overflow-hidden rounded border border-slate-700 bg-[#002b36] p-2"
+	></div>
 </div>
 
 <style>

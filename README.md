@@ -7,26 +7,35 @@ A minimalist AI code generator for your recurring scripts. Generate Node.js, Pyt
 There are three ways to run the development environment locally. All methods support Hot Module Replacement (HMR) and provide a consistent experience.
 
 ### 1. Standard Dev Mode (Vite)
+
 Best for rapid UI development and general logic.
+
 ```bash
 npm install
 npm run dev
 ```
+
 The app will be available at `http://localhost:5173`.
 
 ### 2. Cloudflare Wrangler Emulation
+
 Best for testing Cloudflare-specific features and ensuring production compatibility before deploying to Cloudflare Pages.
+
 ```bash
 npm install
 npm run dev:wrangler
 ```
+
 This builds the project and runs it using the local Wrangler Pages emulator.
 
 ### 3. Docker Compose
+
 Best for a completely isolated environment or for contributors who prefer not to install Node.js locally.
+
 ```bash
 docker compose up
 ```
+
 The container automatically maps your host user's UID/GID to prevent permission issues with build caches. The app will be available at `http://localhost:5173`.
 
 ## API Key Configuration
@@ -34,14 +43,18 @@ The container automatically maps your host user's UID/GID to prevent permission 
 The application requires API keys for Google Gemini and/or Anthropic Claude to generate scripts. There are two ways to provide these:
 
 ### 1. Environment Variables (`.env`)
+
 You can create a `.env` file in the project root based on `.env.example`.
+
 ```bash
 GEMINI_API_KEY=your_key_here
 CLAUDE_API_KEY=your_key_here
 ```
+
 When keys are provided via the environment, the server passes them to the client as defaults. On the first load, these keys are automatically saved to your browser's `localStorage`. This is ideal for private development instances where you want the app to be "ready-to-use" immediately.
 
 ### 2. In-App UI Configuration
+
 If no environment variables are provided, or if you wish to override them, you can enter your API keys directly in the application's UI. These keys are stored only in your browser's `localStorage`. This allows users of a shared deployment to use their own personal API keys securely without them being stored on the server.
 
 ## Features
@@ -56,11 +69,11 @@ If no environment variables are provided, or if you wish to override them, you c
 
 ### Hybrid VM Architecture
 
-| Language | Engine | Technology | Best For |
-| :--- | :--- | :--- | :--- |
-| **Node.js** | **WebContainer** | `@webcontainer/api` | Fast, native Node.js execution. |
-| **Python** | **Microterm** | CheerpX (WebVM) | Standard Library & system tool testing. |
-| **Bash** | **Microterm** | CheerpX (WebVM) | Full Linux `coreutils` fidelity (`date`, `curl`). |
+| Language    | Engine           | Technology          | Best For                                          |
+| :---------- | :--------------- | :------------------ | :------------------------------------------------ |
+| **Node.js** | **WebContainer** | `@webcontainer/api` | Fast, native Node.js execution.                   |
+| **Python**  | **Microterm**    | CheerpX (WebVM)     | Standard Library & system tool testing.           |
+| **Bash**    | **Microterm**    | CheerpX (WebVM)     | Full Linux `coreutils` fidelity (`date`, `curl`). |
 
 ### Key Differences
 
@@ -83,4 +96,6 @@ If no environment variables are provided, or if you wish to override them, you c
 - `npm run preview`: Preview production build
 - `npm run check`: Run Svelte and TypeScript checks
 - `npm run lint`: Run Prettier and ESLint
-- `npm run format`: Format code with Prettier
+- `npm run format`: Run Prettier formatting
+- `npm run test:docker`: Run full Docker verification suite (builds and tests all 3 languages, ~90s)
+- `npm run test:docker:fast`: Run immediate Docker verification (builds all languages but skips 60s cron check, ~20s)

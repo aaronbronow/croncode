@@ -6,16 +6,35 @@
 	import SessionManager from '$lib/components/SessionManager.svelte';
 	import TopMenu from '$lib/components/TopMenu.svelte';
 	import { isDemoMode, appState, isAnyKeyVerified } from '$lib/keys.svelte';
+	import { generateDockerfile } from '$lib/utils/docker';
+	import { scriptState } from '$lib/script.svelte';
 
 	let showHistory = $state(false);
 	let showApiConfig = $state(false);
+	let showDockerfile = $state(false);
+
+	let dockerConfig = $derived(
+		generateDockerfile(scriptState.result, scriptState.activeLanguage, scriptState.cron)
+	);
+
+	function handleDownloadDockerfile() {
+		const blob = new Blob([dockerConfig.dockerfile], { type: 'text/plain' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'Dockerfile';
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
 </script>
 
 <div class="min-h-screen bg-slate-950 px-4 py-12 font-sans text-slate-100 selection:bg-blue-500/30">
-	<div class="absolute right-8 top-8">
-		<TopMenu 
-			onToggleHistory={() => showHistory = !showHistory} 
-			onToggleApiConfig={() => showApiConfig = !showApiConfig}
+	<div class="absolute top-8 right-8">
+		<TopMenu
+			onToggleHistory={() => (showHistory = !showHistory)}
+			onToggleApiConfig={() => (showApiConfig = !showApiConfig)}
 		/>
 	</div>
 
@@ -58,14 +77,67 @@
 				<CronBuilder />
 			</div>
 
-			<div class="rounded-lg border border-slate-800 bg-slate-900 p-6 shadow-xl space-y-8">
-				<h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-600">Code</h2>
-				<section>
-					<PromptInput onToggleApiConfig={() => { showApiConfig = true; }} />
-				</section>
-				<section>
-					<ScriptEdit />
-				</section>
+			<div class="space-y-8">
+				<div class="rounded-lg border border-slate-800 bg-slate-900 p-6 shadow-xl">
+					<h2 class="text-xs font-black tracking-[0.2em] text-slate-600 uppercase">Code</h2>
+					<section>
+						<PromptInput
+							onToggleApiConfig={() => {
+								showApiConfig = true;
+							}}
+						/>
+					</section>
+					<section>
+						<ScriptEdit
+							onToggleDockerfile={() => (showDockerfile = !showDockerfile)}
+							{showDockerfile}
+						/>
+					</section>
+				</div>
+
+				{#if showDockerfile}
+					<div class="rounded-lg border border-slate-800 bg-slate-900 p-6 shadow-xl">
+						<div class="mb-4 flex items-center justify-between">
+							<h2 class="text-xs font-black tracking-[0.2em] text-slate-600 uppercase">
+								Docker Deployment
+							</h2>
+							<button
+								onclick={handleDownloadDockerfile}
+								class="text-xs font-medium text-blue-400 transition-colors hover:text-blue-300"
+							>
+								Download Dockerfile
+							</button>
+						</div>
+
+						<div class="mb-6 rounded border border-blue-500/20 bg-blue-500/5 p-4 text-sm text-slate-400">
+							<p class="mb-3">
+								To deploy your script, download the Dockerfile and use these commands to build and run:
+							</p>
+							<div class="space-y-4">
+								<div>
+									<span class="mb-1 block text-[10px] font-bold tracking-wider text-slate-500 uppercase">
+										Build and Start Cron
+									</span>
+									<div class="rounded bg-slate-950 p-3 font-mono text-xs text-blue-300">
+										docker build -t croncode -f Dockerfile . && docker run --rm croncode
+									</div>
+								</div>
+								<div>
+									<span class="mb-1 block text-[10px] font-bold tracking-wider text-slate-500 uppercase">
+										Run Immediately (Bypass Cron)
+									</span>
+									<div class="rounded bg-slate-950 p-3 font-mono text-xs text-indigo-300">
+										docker run --rm croncode {dockerConfig.runCommand}
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="max-h-96 overflow-auto rounded border border-slate-700 bg-[#073642] p-4 text-sm">
+							<pre class="whitespace-pre-wrap font-mono text-[#839496]">{dockerConfig.dockerfile}</pre>
+						</div>
+					</div>
+				{/if}
 			</div>
 		{:else}
 			<div class="space-y-8">
@@ -73,12 +145,14 @@
 					<ApiKeyInput bind:showConfig={showApiConfig} />
 				</section>
 
-				<section class="flex flex-col justify-center rounded-lg border border-slate-800 p-6 text-center">
+				<section
+					class="flex flex-col justify-center rounded-lg border border-slate-800 p-6 text-center"
+				>
 					<div class="mb-4 text-4xl">🏗️</div>
 					<h3 class="mb-2 text-xl font-semibold">Prompt Engine Coming Soon</h3>
 					<p class="text-slate-400">
-						Once configured, you'll be able to generate scripts in Node.js or Python with built-in crontab
-						support.
+						Once configured, you'll be able to generate scripts in Node.js or Python with built-in
+						crontab support.
 					</p>
 				</section>
 			</div>
