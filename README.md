@@ -99,3 +99,4 @@ If no environment variables are provided, or if you wish to override them, you c
 - `npm run format`: Run Prettier formatting
 - `npm run test:docker`: Run full Docker verification suite (builds and tests all 3 languages, ~90s)
 - `npm run test:docker:fast`: Run immediate Docker verification (builds all languages but skips 60s cron check, ~20s)
+- `npm run test:docker:offline`: Run verification suite with `--network none` to test offline portability

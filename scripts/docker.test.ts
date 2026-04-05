@@ -5,8 +5,11 @@ import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { generateDockerfile } from '../src/lib/utils/docker.ts';
 
-// Check for flag in process.argv or SKIP_CRON env var
+// Check for flags in process.argv or env vars
 const skipCron = process.argv.includes('--skip-cron') || process.env.SKIP_CRON === 'true';
+const offlineMode = process.argv.includes('--offline') || process.env.OFFLINE_MODE === 'true';
+
+const networkFlag = offlineMode ? '--network none' : '--network host';
 
 const languages = [
 	{
@@ -48,6 +51,15 @@ const languages = [
 		isPreExisting: true,
 		sourceDir: 'bash',
 		runCommand: 'sh /app/script.sh'
+	},
+	{
+		name: 'Bash Hacker News',
+		expected: 'Fetching latest Hacker News headlines...',
+		dockerfileName: 'Dockerfile.hacker-news',
+		isPreExisting: true,
+		sourceDir: 'bash',
+		runCommand: 'sh /app/script.sh',
+		skip: true // Requires apk add curl jq which fails in network-restricted build
 	}
 ];
 
@@ -86,7 +98,7 @@ test('Docker Deployment Tests', async (t) => {
 
 				const imageName = `croncode-test-${lang.name.toLowerCase().replace(/[ .]/g, '')}`;
 
-				execSync(`docker build -t ${imageName} -f ${lang.dockerfileName} .`, {
+				execSync(`docker build -t ${imageName} ${networkFlag} -f ${lang.dockerfileName} .`, {
 					cwd: langDir,
 					stdio: 'inherit'
 				});
@@ -103,7 +115,7 @@ test('Docker Deployment Tests', async (t) => {
 			if ((lang as any).skip) continue;
 			await t.test(`Execute ${lang.name}`, () => {
 				console.log(`Running ${lang.name} immediately...`);
-				const cmd = `docker run --rm --network host ${(lang as any).imageName} ${(lang as any).runCommand}`;
+				const cmd = `docker run --rm ${networkFlag} ${(lang as any).imageName} ${(lang as any).runCommand}`;
 				console.log(`Command: ${cmd}`);
 				const output = execSync(cmd, { timeout: 10000 }).toString().trim();
 				console.log(`Output: ${output}`);
@@ -128,7 +140,7 @@ test('Docker Deployment Tests', async (t) => {
 				} catch (e) {}
 
 				console.log(`Starting container for ${lang.name}: ${containerName}`);
-				execSync(`docker run -d --network host --name ${containerName} ${(lang as any).imageName}`);
+				execSync(`docker run -d ${networkFlag} --name ${containerName} ${(lang as any).imageName}`);
 			}
 
 			console.log('\nWaiting 65 seconds for cron jobs to trigger (clock tick)...');

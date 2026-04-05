@@ -65,14 +65,14 @@ fi
 
 # Setup crontab (Alpine Busybox path)
 mkdir -p /var/spool/cron/crontabs
-echo "*/15 * * * * python3 /app/script.py >> /var/log/cron.log 2>&1" > /var/spool/cron/crontabs/root
+echo "* * * * * python3 /app/script.py >> /var/log/cron.log 2>&1" > /var/spool/cron/crontabs/root
 
 # Ensure permissions
 chmod 0600 /var/spool/cron/crontabs/root
 touch /var/log/cron.log
 
 # Run cron in foreground
-echo "Starting cron with schedule: */15 * * * *"
+echo "Starting cron with schedule: * * * * *"
 exec crond -f -l 2
 EOF
 

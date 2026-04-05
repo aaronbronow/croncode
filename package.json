@@ -13,6 +13,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test:docker": "node --experimental-strip-types --test scripts/docker.test.ts",
 		"test:docker:fast": "SKIP_CRON=true node --experimental-strip-types --test scripts/docker.test.ts",
+		"test:docker:offline": "OFFLINE_MODE=true SKIP_CRON=true node --experimental-strip-types --test scripts/docker.test.ts",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write ."
 	},
