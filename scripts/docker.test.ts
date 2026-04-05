@@ -58,8 +58,7 @@ const languages = [
 		dockerfileName: 'Dockerfile.hacker-news',
 		isPreExisting: true,
 		sourceDir: 'bash',
-		runCommand: 'sh /app/script.sh',
-		skip: true // Requires apk add curl jq which fails in network-restricted build
+		runCommand: 'sh /app/script.sh'
 	}
 ];
 
