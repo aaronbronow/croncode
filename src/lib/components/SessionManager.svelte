@@ -4,7 +4,7 @@
 
 	let { showHistory = $bindable(false) } = $props();
 
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement>();
 	let viewMode = $state('history'); // 'history' or 'yaml'
 	let isDragging = $state(false);
 
@@ -172,12 +172,11 @@
 					{viewMode === 'history' ? 'View YAML' : 'View History'}
 				</button>
 				<button
-					onclick={() => fileInput.click()}
+					onclick={() => fileInput?.click()}
 					class="rounded border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
 				>
 					Upload
-				</button>
-				<button
+				</button>				<button
 					onclick={saveSession}
 					class="rounded border border-blue-600 bg-blue-600/20 px-3 py-1.5 text-xs font-medium text-blue-400 transition-colors hover:bg-blue-600/30"
 				>
