@@ -171,4 +171,8 @@
 			</div>
 		{/if}
 	</main>
+
+	<footer class="mt-12 pb-8 text-center text-xs text-slate-500">
+		v{__APP_VERSION__} ({__COMMIT_HASH__})
+	</footer>
 </div>
