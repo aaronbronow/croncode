@@ -162,7 +162,9 @@
 			>
 				<option value="Node.js">Node.js</option>
 				<option value="Python">Python</option>
-				<option value="Bash">Bash</option>
+				{#if scriptState.ENABLE_WEBVM}
+					<option value="Bash">Bash</option>
+				{/if}
 			</select>
 		</div>
 
