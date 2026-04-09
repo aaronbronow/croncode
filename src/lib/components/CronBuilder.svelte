@@ -18,16 +18,26 @@
 
 	let lastValidCron = $state(scriptState.cron);
 
+	function isValidCron(cron: string) {
+		try {
+			const parts = cron.trim().split(/\s+/);
+			if (parts.length !== 5) return false;
+			CronExpressionParser.parse(cron);
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
 	// Sync nlInput with scriptState.cron whenever cron changes or focus shifts
 	$effect(() => {
 		const currentCron = scriptState.cron;
-		try {
-			CronExpressionParser.parse(currentCron);
+		if (isValidCron(currentCron)) {
 			lastValidCron = currentCron;
 			if (!isNlFocused) {
 				nlInput = formatCronForPalette(currentCron);
 			}
-		} catch {
+		} else {
 			if (!isNlFocused) {
 				nlInput = '';
 			}
@@ -35,8 +45,11 @@
 	});
 
 	let nextRuns = $derived.by(() => {
+		const currentCron = scriptState.cron;
+		if (!isValidCron(currentCron)) return [];
+
 		try {
-			const interval = CronExpressionParser.parse(scriptState.cron);
+			const interval = CronExpressionParser.parse(currentCron);
 			const runs = [];
 			for (let i = 0; i < 10; i++) {
 				runs.push(interval.next().toDate());
@@ -109,9 +122,7 @@
 	}
 
 	function handleCronBlur() {
-		try {
-			CronExpressionParser.parse(scriptState.cron);
-		} catch {
+		if (!isValidCron(scriptState.cron)) {
 			scriptState.cron = lastValidCron;
 		}
 	}

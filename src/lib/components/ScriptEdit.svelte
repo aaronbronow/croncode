@@ -6,15 +6,16 @@
 	import { StreamLanguage } from '@codemirror/language';
 	import { shell } from '@codemirror/legacy-modes/mode/shell';
 	import { executeScript } from '$lib/webcontainer';
+	import { executePython } from '$lib/pyodide';
 	import MicrotermRunner from './MicrotermRunner.svelte';
 
 	let runner: any = $state(null);
 
-	const langs: Record<string, any> = {
+	const langs: Record<string, any> = $derived({
 		'Node.js': javascript(),
 		Python: python(),
-		Bash: StreamLanguage.define(shell)
-	};
+		...(scriptState.ENABLE_WEBVM ? { Bash: StreamLanguage.define(shell) } : {})
+	});
 
 	let editorLang = $derived(langs[scriptState.language] || javascript());
 
@@ -37,6 +38,7 @@
 				scriptState.activeScriptId = crypto.randomUUID();
 				scriptState.history.push({
 					id: scriptState.activeScriptId,
+					version: __APP_VERSION__,
 					timestamp: new Date().toISOString(),
 					code: scriptState.result,
 					language: scriptState.activeLanguage,
@@ -55,6 +57,16 @@
 				}
 				await executeScript(
 					executionLanguage,
+					scriptState.result,
+					(data) => {
+						if (runner) runner.writeToTerminal(data);
+					},
+					(msg) => {
+						if (runner) runner.writeToTerminal(`\x1b[1;34m${msg}\x1b[0m`);
+					}
+				);
+			} else if (executionLanguage === 'Python' && !scriptState.ENABLE_WEBVM) {
+				await executePython(
 					scriptState.result,
 					(data) => {
 						if (runner) runner.writeToTerminal(data);
@@ -138,9 +150,7 @@
 
 	<div class="mt-4">
 		<div class="mb-2 flex items-center justify-between">
-			<h3 class="text-xs font-medium tracking-wider text-slate-500 uppercase">
-				Terminal Output
-			</h3>
+			<h3 class="text-xs font-medium tracking-wider text-slate-500 uppercase">Terminal Output</h3>
 			<div class="flex items-center gap-4">
 				<div class="flex items-center gap-2">
 					<div
@@ -153,23 +163,25 @@
 							? 'text-green-400'
 							: 'text-slate-600'}"
 					>
-						WebContainer {scriptState.webContainerReady ? 'Ready' : ''}
+						Sandbox {scriptState.webContainerReady ? 'Ready' : ''}
 					</span>
 				</div>
-				<div class="flex items-center gap-2">
-					<div
-						class="h-1.5 w-1.5 rounded-full {scriptState.webVmReady
-							? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]'
-							: 'bg-slate-600'}"
-					></div>
-					<span
-						class="text-[10px] font-medium tracking-wider uppercase {scriptState.webVmReady
-							? 'text-green-400'
-							: 'text-slate-600'}"
-					>
-						WebVM {scriptState.webVmReady ? 'Ready' : ''}
-					</span>
-				</div>
+				{#if scriptState.ENABLE_WEBVM}
+					<div class="flex items-center gap-2">
+						<div
+							class="h-1.5 w-1.5 rounded-full {scriptState.webVmReady
+								? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]'
+								: 'bg-slate-600'}"
+						></div>
+						<span
+							class="text-[10px] font-medium tracking-wider uppercase {scriptState.webVmReady
+								? 'text-green-400'
+								: 'text-slate-600'}"
+						>
+							WebVM {scriptState.webVmReady ? 'Ready' : ''}
+						</span>
+					</div>
+				{/if}
 			</div>
 		</div>
 		<div class="h-64 overflow-hidden rounded border border-slate-700 bg-[#002b36]">

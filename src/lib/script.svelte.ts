@@ -1,5 +1,6 @@
 export interface HistoryEntry {
 	id: string;
+	version: string;
 	timestamp: string;
 	prompt?: string;
 	code: string;
@@ -20,7 +21,8 @@ const DEFAULT_STATE = {
 	activeScriptId: null as string | null,
 	history: [] as HistoryEntry[],
 	webContainerReady: false,
-	webVmReady: false
+	webVmReady: false,
+	ENABLE_WEBVM: false
 };
 
 function loadState() {

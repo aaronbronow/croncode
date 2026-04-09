@@ -23,6 +23,7 @@
 	});
 
 	const currentSnapshot = $derived({
+		version: __APP_VERSION__,
 		promptText: scriptState.promptText,
 		language: scriptState.language,
 		activeLanguage: scriptState.activeLanguage,
