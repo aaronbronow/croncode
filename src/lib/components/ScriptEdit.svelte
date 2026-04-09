@@ -38,6 +38,7 @@
 				scriptState.activeScriptId = crypto.randomUUID();
 				scriptState.history.push({
 					id: scriptState.activeScriptId,
+					version: __APP_VERSION__,
 					timestamp: new Date().toISOString(),
 					code: scriptState.result,
 					language: scriptState.activeLanguage,
@@ -149,9 +150,7 @@
 
 	<div class="mt-4">
 		<div class="mb-2 flex items-center justify-between">
-			<h3 class="text-xs font-medium tracking-wider text-slate-500 uppercase">
-				Terminal Output
-			</h3>
+			<h3 class="text-xs font-medium tracking-wider text-slate-500 uppercase">Terminal Output</h3>
 			<div class="flex items-center gap-4">
 				<div class="flex items-center gap-2">
 					<div
@@ -164,7 +163,7 @@
 							? 'text-green-400'
 							: 'text-slate-600'}"
 					>
-						WebContainer {scriptState.webContainerReady ? 'Ready' : ''}
+						Sandbox {scriptState.webContainerReady ? 'Ready' : ''}
 					</span>
 				</div>
 				{#if scriptState.ENABLE_WEBVM}

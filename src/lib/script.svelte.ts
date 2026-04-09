@@ -1,5 +1,6 @@
 export interface HistoryEntry {
 	id: string;
+	version: string;
 	timestamp: string;
 	prompt?: string;
 	code: string;

@@ -142,7 +142,7 @@
 		fitAddon.fit();
 
 		terminal.writeln(
-			'\x1b[1;34m[System] Terminal Ready. Defaulting to WebContainer for Node.js.\x1b[0m'
+			'\x1b[1;34m[System] Terminal Ready. Defaulting to Sandbox for Node.js.\x1b[0m'
 		);
 	});
 
